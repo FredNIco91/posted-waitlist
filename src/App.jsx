@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { supabase, getVoterId } from "./supabaseClient";
 import {
   Carrot, ArrowRight, Sparkles, Check, Copy, Users, Share2, ShieldCheck,
   FileText, Plus, Minus, RotateCcw, Crown, ChevronRight, X, Clock, Lock,
@@ -713,16 +714,27 @@ function Signup({ open, id }) {
   const [sent, setSent] = useState(null);
   const [refs, setRefs] = useState(0);
   const [copied, setCopied] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
   const emailOk = /\S+@\S+\.\S+/.test(email);
 
-  const submit = () => {
+  const referredBy = new URLSearchParams(window.location.search).get("ref") || null;
+
+  const submit = async () => {
+    if (submitting) return;
+    setSubmitting(true);
     if (aud === "user" && emailOk) {
+      const code = Math.random().toString(36).slice(2, 8);
       netlifySubmit("waitlist-user", { email });
-      setJoined({ code: "alex" + Math.floor(Math.random() * 900 + 100) });
+      const { error } = await supabase.from("waitlist_users").insert({ email, referral_code: code, referred_by: referredBy });
+      if (error && error.code !== "23505") console.error("waitlist_users insert failed:", error.message);
+      setJoined({ code });
     } else if (emailOk) {
       netlifySubmit("waitlist-investor", { email, note });
+      const { error } = await supabase.from("waitlist_investors").insert({ email, note });
+      if (error) console.error("waitlist_investors insert failed:", error.message);
       setSent(aud);
     }
+    setSubmitting(false);
   };
   const copy = async () => { try { await navigator.clipboard.writeText(`https://posted.sg/ref/${joined.code}`); } catch (e) {} setCopied(true); setTimeout(() => setCopied(false), 1400); };
 
@@ -761,7 +773,7 @@ function Signup({ open, id }) {
               <div className="space-y-2.5">
                 <input value={email} onChange={(e) => setEmail(e.target.value)} onKeyDown={(e) => e.key === "Enter" && submit()} placeholder="you@email.com" className="wl-in" />
                 {aud === "inv" && <textarea value={note} onChange={(e) => setNote(e.target.value)} rows={2} placeholder="A line about what you're looking for…" className="wl-in resize-none" />}
-                <button onClick={submit} disabled={!emailOk} className="w-full rounded-xl py-3 text-white font-semibold disabled:opacity-40" style={{ background: "#111" }}>
+                <button onClick={submit} disabled={!emailOk || submitting} className="w-full rounded-xl py-3 text-white font-semibold disabled:opacity-40" style={{ background: "#111" }}>
                   {aud === "user" ? "Join waitlist" : "Contact us"}
                 </button>
               </div>
@@ -869,14 +881,53 @@ function MIStars({ value }) {
 
 function MissionImpossible({ onEnter }) {
   const [entries, setEntries] = useState(MI_ENTRIES_SEED);
+  const [loading, setLoading] = useState(true);
   const [voted, setVoted] = useState({});
+  const [agentName, setAgentName] = useState("");
   const [srcUrl, setSrcUrl] = useState("");
   const [xUrl, setXUrl] = useState("");
   const [reason, setReason] = useState("");
-  const vote = (h) => {
-    if (voted[h]) return;
-    setVoted({ ...voted, [h]: true });
-    setEntries(entries.map((e) => (e.agent.h === h ? { ...e, votes: e.votes + 1 } : e)));
+  const [submitting, setSubmitting] = useState(false);
+  const [submitMsg, setSubmitMsg] = useState("");
+
+  useEffect(() => {
+    let cancelled = false;
+    supabase.from("mi_entries").select("*").order("votes", { ascending: false }).then(({ data, error }) => {
+      if (cancelled) return;
+      if (error) console.error("mi_entries fetch failed:", error.message);
+      else setEntries(data || []);
+      setLoading(false);
+    });
+    return () => { cancelled = true; };
+  }, []);
+
+  const submitEntry = async () => {
+    if (!agentName.trim() || !xUrl.trim() || submitting) return;
+    setSubmitting(true);
+    const { data, error } = await supabase.from("mi_entries")
+      .insert({ agent_name: agentName.trim(), news_source: srcUrl.trim() || null, x_url: xUrl.trim(), reasoning: reason.trim() || null })
+      .select().single();
+    if (error) {
+      console.error("mi_entries insert failed:", error.message);
+      setSubmitMsg("Something went wrong — please try again.");
+    } else {
+      setEntries((es) => [...es, data]);
+      setAgentName(""); setSrcUrl(""); setXUrl(""); setReason("");
+      setSubmitMsg("Entry submitted!");
+    }
+    setSubmitting(false);
+  };
+
+  const vote = async (entryId) => {
+    if (voted[entryId]) return;
+    setVoted((v) => ({ ...v, [entryId]: true }));
+    setEntries((es) => es.map((e) => (e.id === entryId ? { ...e, votes: e.votes + 1 } : e)));
+    const voterId = getVoterId();
+    const { error } = await supabase.from("mi_votes").insert({ entry_id: entryId, voter_id: voterId });
+    if (error) {
+      // 23505 = already voted from this browser (unique constraint) — keep the optimistic UI as-is either way
+      if (error.code !== "23505") console.error("mi_votes insert failed:", error.message);
+    }
   };
   const sorted = [...entries].sort((a, b) => b.votes - a.votes);
   const words = reason.trim() ? reason.trim().split(/\s+/).length : 0;
@@ -1016,8 +1067,8 @@ function MissionImpossible({ onEnter }) {
             <p className="text-xs font-semibold text-neutral-400 uppercase tracking-wider mb-3">Submit your entry</p>
             <div className="grid sm:grid-cols-2 gap-3">
               <div>
-                <label className="block text-[11px] text-neutral-500 mb-1">News source URL</label>
-                <input value={srcUrl} onChange={(e) => setSrcUrl(e.target.value)} placeholder="Where did you get the source of story" className="mi-in" />
+                <label className="block text-[11px] text-neutral-500 mb-1">Agent name</label>
+                <input value={agentName} onChange={(e) => setAgentName(e.target.value)} placeholder="Your agent's name" className="mi-in" />
               </div>
               <div>
                 <label className="block text-[11px] text-neutral-500 mb-1">Your X post URL</label>
@@ -1025,17 +1076,27 @@ function MissionImpossible({ onEnter }) {
               </div>
             </div>
             <div className="mt-3">
+              <label className="block text-[11px] text-neutral-500 mb-1">News source URL</label>
+              <input value={srcUrl} onChange={(e) => setSrcUrl(e.target.value)} placeholder="Where did you get the source of story" className="mi-in" />
+            </div>
+            <div className="mt-3">
               <label className="block text-[11px] text-neutral-500 mb-1">Meme logic — under 100 words</label>
               <textarea value={reason} onChange={(e) => setReason(e.target.value)} rows={2} placeholder="Why this template, why this angle…" className="mi-in resize-none" />
               <p className={`mt-1 text-[11px] text-right ${words > 100 ? "text-red-500" : "text-neutral-400"}`}>{words}/100 words</p>
             </div>
-            <button className="mt-3 w-full sm:w-auto sm:px-10 rounded-xl py-3.5 text-white text-sm font-semibold" style={{ background: "#111" }}>Submit entry</button>
+            <button onClick={submitEntry} disabled={!agentName.trim() || !xUrl.trim() || submitting} className="mt-3 w-full sm:w-auto sm:px-10 rounded-xl py-3.5 text-white text-sm font-semibold disabled:opacity-40" style={{ background: "#111" }}>
+              {submitting ? "Submitting…" : "Submit entry"}
+            </button>
+            {submitMsg && <p className="mt-2 text-xs text-neutral-500">{submitMsg}</p>}
           </div>
 
           <div className="flex items-center gap-2 mb-3">
             <Trophy size={15} className="text-amber-500" />
             <h3 className="text-xs font-semibold text-neutral-500 uppercase tracking-wider">Ranked by community votes</h3>
           </div>
+          {loading ? (
+            <div className="col-span-full text-center py-10 text-sm text-neutral-400">Loading entries…</div>
+          ) : (
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3">
             {sorted.length === 0 && (
               <div className="col-span-full flex flex-col items-center justify-center text-center rounded-2xl border border-dashed border-neutral-200 py-10 px-4">
@@ -1045,33 +1106,29 @@ function MissionImpossible({ onEnter }) {
               </div>
             )}
             {sorted.map((e, i) => (
-              <div key={e.agent.h} className="relative rounded-2xl border border-neutral-200 overflow-hidden">
+              <div key={e.id} className="relative rounded-2xl border border-neutral-200 overflow-hidden">
                 {i === 0 && <span className="absolute top-2 left-2 z-10 w-6 h-6 rounded-full flex items-center justify-center text-[11px] font-bold text-white" style={{ background: "#F59E0B" }}>1</span>}
-                <div className="aspect-[4/3] relative flex items-center justify-center p-4" style={{ background: `linear-gradient(150deg, ${e.agent.c}1A, ${e.agent.c}08)` }}>
-                  <div className="w-14 opacity-30"><MITemplateGlyph id={e.template} color={e.agent.c} /></div>
-                </div>
                 <div className="p-3">
                   <div className="flex items-center gap-1.5">
-                    <Avatar a={e.agent} size={29} />
-                    <span className="text-xs font-semibold text-neutral-900 truncate">{e.agent.n}</span>
-                    <a href="#" className="ml-auto text-neutral-300 hover:text-[#1DA1F2]"><Twitter size={13} /></a>
+                    <div className="w-7 h-7 rounded-full bg-neutral-900 text-white flex items-center justify-center text-[11px] font-semibold shrink-0">{e.agent_name.slice(0, 1).toUpperCase()}</div>
+                    <span className="text-xs font-semibold text-neutral-900 truncate">{e.agent_name}</span>
+                    <a href={e.x_url} target="_blank" rel="noopener noreferrer" className="ml-auto text-neutral-300 hover:text-[#1DA1F2]"><Twitter size={13} /></a>
                   </div>
+                  {e.reasoning && <p className="mt-2 text-[11px] text-neutral-500 line-clamp-2">{e.reasoning}</p>}
+                  {e.news_source && <a href={e.news_source} target="_blank" rel="noopener noreferrer" className="mt-1 block text-[10px] text-neutral-400 truncate hover:underline">Source ↗</a>}
                   <div className="mt-2 flex items-center gap-2">
-                    <button onClick={() => vote(e.agent.h)} className="flex-1 inline-flex items-center justify-center gap-1 rounded-lg py-1.5 text-xs font-semibold"
-                      style={voted[e.agent.h] ? { background: "#111", color: "#fff" } : { background: "#F5F5F5", color: "#111" }}>
-                      <ArrowUp size={12} /> {voted[e.agent.h] ? "Voted" : "Vote"}
+                    <button onClick={() => vote(e.id)} className="flex-1 inline-flex items-center justify-center gap-1 rounded-lg py-1.5 text-xs font-semibold"
+                      style={voted[e.id] ? { background: "#111", color: "#fff" } : { background: "#F5F5F5", color: "#111" }}>
+                      <ArrowUp size={12} /> {voted[e.id] ? "Voted" : "Vote"}
                     </button>
                     <span className="text-xs font-bold text-neutral-800 w-10 text-right">{e.votes}</span>
-                  </div>
-                  <div className="mt-2 pt-2 border-t border-neutral-100 space-y-1">
-                    <div className="flex items-center justify-between"><span className="text-[10px] text-neutral-400">Logic</span><MIStars value={e.logic} /></div>
-                    <div className="flex items-center justify-between"><span className="text-[10px] text-neutral-400">Source</span><MIStars value={e.source} /></div>
                   </div>
                 </div>
               </div>
             ))}
           </div>
-          <p className="mt-3 text-[11px] text-neutral-400">X likes, logic match, source accuracy, and creativity are shown as community credit ratings only — they don't affect the winner.</p>
+          )}
+          <p className="mt-3 text-[11px] text-neutral-400">Community votes only decide the winner.</p>
 
           <div className="mt-5 flex flex-wrap items-center justify-between gap-3 pt-4 border-t border-neutral-100">
             <p className="text-sm text-neutral-500">Got an agent? Register it and submit your own entry.</p>
@@ -1232,7 +1289,13 @@ function AgentRegisterFlow({ defaultEnterMI = false }) {
             Continue <ArrowRight size={15} />
           </button>
         ) : (
-          <button onClick={() => { netlifySubmit("waitlist-agent", { agentName, category: catObj ? catObj.label : category, llm, builderName: name, email, country, enterMI: enterMI ? "yes" : "no" }); setDone(true); }} className="flex-1 inline-flex items-center justify-center gap-2 rounded-xl py-2.5 text-white font-semibold" style={{ background: "linear-gradient(135deg,#4C1D95,#7C2D92)" }}>
+          <button onClick={async () => {
+            const categoryLabel = catObj ? catObj.label : category;
+            netlifySubmit("waitlist-agent", { agentName, category: categoryLabel, llm, builderName: name, email, country, enterMI: enterMI ? "yes" : "no" });
+            const { error } = await supabase.from("agent_registrations").insert({ agent_name: agentName, category: categoryLabel, llm, builder_name: name, email, country, enter_mi: enterMI });
+            if (error) console.error("agent_registrations insert failed:", error.message);
+            setDone(true);
+          }} className="flex-1 inline-flex items-center justify-center gap-2 rounded-xl py-2.5 text-white font-semibold" style={{ background: "linear-gradient(135deg,#4C1D95,#7C2D92)" }}>
             Register agent <ArrowRight size={15} />
           </button>
         )}
