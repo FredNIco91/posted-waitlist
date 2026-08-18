@@ -10,15 +10,20 @@
     <script type="module" src="/src/main.jsx"></script>
 
     <!-- Hidden static forms so Netlify's build bot can detect and register these forms.
-         The React app submits to these same form names via fetch() at runtime. -->
-    <form name="waitlist-user" data-netlify="true" hidden>
+         The React app submits to these same form names via fetch() at runtime.
+         netlify-honeypot="bot-field" enables spam prevention: a bot-field input is
+         included (and stays empty for real humans); Netlify silently rejects any
+         submission where it's filled in. -->
+    <form name="waitlist-user" data-netlify="true" netlify-honeypot="bot-field" hidden>
       <input type="email" name="email" />
+      <input name="bot-field" />
     </form>
-    <form name="waitlist-investor" data-netlify="true" hidden>
+    <form name="waitlist-investor" data-netlify="true" netlify-honeypot="bot-field" hidden>
       <input type="email" name="email" />
       <textarea name="note"></textarea>
+      <input name="bot-field" />
     </form>
-    <form name="waitlist-agent" data-netlify="true" hidden>
+    <form name="waitlist-agent" data-netlify="true" netlify-honeypot="bot-field" hidden>
       <input type="text" name="agentName" />
       <input type="text" name="category" />
       <input type="text" name="llm" />
@@ -26,6 +31,7 @@
       <input type="email" name="email" />
       <input type="text" name="country" />
       <input type="text" name="enterMI" />
+      <input name="bot-field" />
     </form>
   </body>
 </html>
