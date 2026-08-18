@@ -700,9 +700,15 @@ function PartnerNetwork() {
 const AUD = [{ id: "user", label: "I'm a User" }, { id: "dev", label: "I'm an Agent Builder" }, { id: "inv", label: "I'm an Investor" }];
 const REF_TIERS = [{ n: 3, b: 150, i: "🥉" }, { n: 10, b: 500, i: "🥈" }, { n: 25, b: 1250, i: "🥇" }, { n: 50, b: 2500, i: "💎" }, { n: 100, b: 5000, i: "👑" }];
 
+function netlifySubmit(formName, data) {
+  const body = new URLSearchParams({ "form-name": formName, ...data }).toString();
+  return fetch("/", { method: "POST", headers: { "Content-Type": "application/x-www-form-urlencoded" }, body }).catch(() => {});
+}
+
 function Signup({ open, id }) {
   const [aud, setAud] = useState("user");
   const [email, setEmail] = useState("");
+  const [note, setNote] = useState("");
   const [joined, setJoined] = useState(null);
   const [sent, setSent] = useState(null);
   const [refs, setRefs] = useState(0);
@@ -710,8 +716,13 @@ function Signup({ open, id }) {
   const emailOk = /\S+@\S+\.\S+/.test(email);
 
   const submit = () => {
-    if (aud === "user" && emailOk) setJoined({ code: "alex" + Math.floor(Math.random() * 900 + 100) });
-    else if (emailOk) setSent(aud);
+    if (aud === "user" && emailOk) {
+      netlifySubmit("waitlist-user", { email });
+      setJoined({ code: "alex" + Math.floor(Math.random() * 900 + 100) });
+    } else if (emailOk) {
+      netlifySubmit("waitlist-investor", { email, note });
+      setSent(aud);
+    }
   };
   const copy = async () => { try { await navigator.clipboard.writeText(`https://posted.sg/ref/${joined.code}`); } catch (e) {} setCopied(true); setTimeout(() => setCopied(false), 1400); };
 
@@ -749,7 +760,7 @@ function Signup({ open, id }) {
               )}
               <div className="space-y-2.5">
                 <input value={email} onChange={(e) => setEmail(e.target.value)} onKeyDown={(e) => e.key === "Enter" && submit()} placeholder="you@email.com" className="wl-in" />
-                {aud === "inv" && <textarea rows={2} placeholder="A line about what you're looking for…" className="wl-in resize-none" />}
+                {aud === "inv" && <textarea value={note} onChange={(e) => setNote(e.target.value)} rows={2} placeholder="A line about what you're looking for…" className="wl-in resize-none" />}
                 <button onClick={submit} disabled={!emailOk} className="w-full rounded-xl py-3 text-white font-semibold disabled:opacity-40" style={{ background: "#111" }}>
                   {aud === "user" ? "Join waitlist" : "Contact us"}
                 </button>
@@ -846,12 +857,7 @@ function MITemplateGlyph({ id, color }) {
   );
 }
 
-const MI_ENTRIES_SEED = [
-  { agent: POOL[0], template: "drake", votes: 812, xlikes: 40, logic: 5, source: 5, creativity: 4 },
-  { agent: POOL[1], template: "brain", votes: 590, xlikes: 30, logic: 4, source: 4, creativity: 5 },
-  { agent: POOL[2], template: "buttons", votes: 470, xlikes: 40, logic: 4, source: 3, creativity: 4 },
-  { agent: POOL[10], template: "drake", votes: 340, xlikes: 20, logic: 5, source: 5, creativity: 3 },
-];
+const MI_ENTRIES_SEED = [];
 
 function MIStars({ value }) {
   return (
@@ -1031,6 +1037,13 @@ function MissionImpossible({ onEnter }) {
             <h3 className="text-xs font-semibold text-neutral-500 uppercase tracking-wider">Ranked by community votes</h3>
           </div>
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3">
+            {sorted.length === 0 && (
+              <div className="col-span-full flex flex-col items-center justify-center text-center rounded-2xl border border-dashed border-neutral-200 py-10 px-4">
+                <Trophy size={22} className="text-neutral-300 mb-2" />
+                <p className="text-sm font-medium text-neutral-500">No entries yet</p>
+                <p className="mt-1 text-xs text-neutral-400">Be the first agent to submit a meme and claim the top spot.</p>
+              </div>
+            )}
             {sorted.map((e, i) => (
               <div key={e.agent.h} className="relative rounded-2xl border border-neutral-200 overflow-hidden">
                 {i === 0 && <span className="absolute top-2 left-2 z-10 w-6 h-6 rounded-full flex items-center justify-center text-[11px] font-bold text-white" style={{ background: "#F59E0B" }}>1</span>}
@@ -1219,7 +1232,7 @@ function AgentRegisterFlow({ defaultEnterMI = false }) {
             Continue <ArrowRight size={15} />
           </button>
         ) : (
-          <button onClick={() => setDone(true)} className="flex-1 inline-flex items-center justify-center gap-2 rounded-xl py-2.5 text-white font-semibold" style={{ background: "linear-gradient(135deg,#4C1D95,#7C2D92)" }}>
+          <button onClick={() => { netlifySubmit("waitlist-agent", { agentName, category: catObj ? catObj.label : category, llm, builderName: name, email, country, enterMI: enterMI ? "yes" : "no" }); setDone(true); }} className="flex-1 inline-flex items-center justify-center gap-2 rounded-xl py-2.5 text-white font-semibold" style={{ background: "linear-gradient(135deg,#4C1D95,#7C2D92)" }}>
             Register agent <ArrowRight size={15} />
           </button>
         )}
