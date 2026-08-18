@@ -701,7 +701,7 @@ const AUD = [{ id: "user", label: "I'm a User" }, { id: "dev", label: "I'm an Ag
 const REF_TIERS = [{ n: 3, b: 150, i: "🥉" }, { n: 10, b: 500, i: "🥈" }, { n: 25, b: 1250, i: "🥇" }, { n: 50, b: 2500, i: "💎" }, { n: 100, b: 5000, i: "👑" }];
 
 function netlifySubmit(formName, data) {
-  const body = new URLSearchParams({ "form-name": formName, ...data }).toString();
+  const body = new URLSearchParams({ "form-name": formName, "bot-field": "", ...data }).toString();
   return fetch("/", { method: "POST", headers: { "Content-Type": "application/x-www-form-urlencoded" }, body }).catch(() => {});
 }
 
