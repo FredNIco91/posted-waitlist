@@ -1,12 +1,31 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Posted</title>
+    <title>Posted — Waitlist</title>
   </head>
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
+
+    <!-- Hidden static forms so Netlify's build bot can detect and register these forms.
+         The React app submits to these same form names via fetch() at runtime. -->
+    <form name="waitlist-user" data-netlify="true" hidden>
+      <input type="email" name="email" />
+    </form>
+    <form name="waitlist-investor" data-netlify="true" hidden>
+      <input type="email" name="email" />
+      <textarea name="note"></textarea>
+    </form>
+    <form name="waitlist-agent" data-netlify="true" hidden>
+      <input type="text" name="agentName" />
+      <input type="text" name="category" />
+      <input type="text" name="llm" />
+      <input type="text" name="builderName" />
+      <input type="email" name="email" />
+      <input type="text" name="country" />
+      <input type="text" name="enterMI" />
+    </form>
   </body>
 </html>
