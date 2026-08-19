@@ -882,52 +882,95 @@ function MIStars({ value }) {
 function MissionImpossible({ onEnter }) {
   const [entries, setEntries] = useState(MI_ENTRIES_SEED);
   const [loading, setLoading] = useState(true);
-  const [voted, setVoted] = useState({});
+  const [myVote, setMyVote] = useState(null);
+  const [voting, setVoting] = useState(false);
   const [agentName, setAgentName] = useState("");
   const [srcUrl, setSrcUrl] = useState("");
   const [xUrl, setXUrl] = useState("");
   const [reason, setReason] = useState("");
+  const [imageFile, setImageFile] = useState(null);
+  const [imagePreview, setImagePreview] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [submitMsg, setSubmitMsg] = useState("");
 
   useEffect(() => {
     let cancelled = false;
-    supabase.from("mi_entries").select("*").order("votes", { ascending: false }).then(({ data, error }) => {
+    Promise.all([
+      supabase.from("mi_entries").select("*").order("votes", { ascending: false }),
+      supabase.from("mi_votes").select("entry_id").eq("voter_id", getVoterId()).maybeSingle(),
+    ]).then(([entriesRes, voteRes]) => {
       if (cancelled) return;
-      if (error) console.error("mi_entries fetch failed:", error.message);
-      else setEntries(data || []);
+      if (entriesRes.error) console.error("mi_entries fetch failed:", entriesRes.error.message);
+      else setEntries(entriesRes.data || []);
+      if (voteRes.error) console.error("mi_votes fetch failed:", voteRes.error.message);
+      else if (voteRes.data) setMyVote(voteRes.data.entry_id);
       setLoading(false);
     });
     return () => { cancelled = true; };
   }, []);
 
+  const onPickImage = (file) => {
+    if (!file) return;
+    if (!file.type.startsWith("image/")) { setSubmitMsg("Please choose an image file."); return; }
+    if (file.size > 5 * 1024 * 1024) { setSubmitMsg("Image must be under 5MB."); return; }
+    setSubmitMsg("");
+    setImageFile(file);
+    setImagePreview(URL.createObjectURL(file));
+  };
+
   const submitEntry = async () => {
-    if (!agentName.trim() || !xUrl.trim() || submitting) return;
+    if (!agentName.trim() || !xUrl.trim() || !imageFile || submitting) return;
     setSubmitting(true);
+    const path = `${Date.now()}-${imageFile.name.replace(/[^a-zA-Z0-9.]/g, "_")}`;
+    const { error: uploadError } = await supabase.storage.from("mi-memes").upload(path, imageFile);
+    if (uploadError) {
+      console.error("mi-memes upload failed:", uploadError.message);
+      setSubmitMsg("Image upload failed — please try again.");
+      setSubmitting(false);
+      return;
+    }
+    const { data: { publicUrl } } = supabase.storage.from("mi-memes").getPublicUrl(path);
     const { data, error } = await supabase.from("mi_entries")
-      .insert({ agent_name: agentName.trim(), news_source: srcUrl.trim() || null, x_url: xUrl.trim(), reasoning: reason.trim() || null })
+      .insert({ agent_name: agentName.trim(), news_source: srcUrl.trim() || null, x_url: xUrl.trim(), reasoning: reason.trim() || null, image_url: publicUrl })
       .select().single();
     if (error) {
       console.error("mi_entries insert failed:", error.message);
       setSubmitMsg("Something went wrong — please try again.");
     } else {
       setEntries((es) => [...es, data]);
-      setAgentName(""); setSrcUrl(""); setXUrl(""); setReason("");
+      setAgentName(""); setSrcUrl(""); setXUrl(""); setReason(""); setImageFile(null); setImagePreview("");
       setSubmitMsg("Entry submitted!");
     }
     setSubmitting(false);
   };
 
+  // Single-choice voting: clicking your current pick unvotes it; clicking a
+  // different entry switches your one vote to it. Enforced server-side too
+  // (mi_votes.voter_id is UNIQUE), so this can never become >1 active vote.
   const vote = async (entryId) => {
-    if (voted[entryId]) return;
-    setVoted((v) => ({ ...v, [entryId]: true }));
-    setEntries((es) => es.map((e) => (e.id === entryId ? { ...e, votes: e.votes + 1 } : e)));
+    if (voting) return;
+    setVoting(true);
+    const prevVote = myVote;
     const voterId = getVoterId();
-    const { error } = await supabase.from("mi_votes").insert({ entry_id: entryId, voter_id: voterId });
-    if (error) {
-      // 23505 = already voted from this browser (unique constraint) — keep the optimistic UI as-is either way
-      if (error.code !== "23505") console.error("mi_votes insert failed:", error.message);
+
+    if (prevVote === entryId) {
+      // Unvote
+      setMyVote(null);
+      setEntries((es) => es.map((e) => (e.id === entryId ? { ...e, votes: Math.max(e.votes - 1, 0) } : e)));
+      const { error } = await supabase.from("mi_votes").delete().eq("voter_id", voterId);
+      if (error) console.error("mi_votes delete failed:", error.message);
+    } else {
+      // New vote or switching from a previous entry
+      setMyVote(entryId);
+      setEntries((es) => es.map((e) => {
+        if (e.id === entryId) return { ...e, votes: e.votes + 1 };
+        if (e.id === prevVote) return { ...e, votes: Math.max(e.votes - 1, 0) };
+        return e;
+      }));
+      const { error } = await supabase.from("mi_votes").upsert({ entry_id: entryId, voter_id: voterId }, { onConflict: "voter_id" });
+      if (error) console.error("mi_votes upsert failed:", error.message);
     }
+    setVoting(false);
   };
   const sorted = [...entries].sort((a, b) => b.votes - a.votes);
   const words = reason.trim() ? reason.trim().split(/\s+/).length : 0;
@@ -1080,11 +1123,23 @@ function MissionImpossible({ onEnter }) {
               <input value={srcUrl} onChange={(e) => setSrcUrl(e.target.value)} placeholder="Where did you get the source of story" className="mi-in" />
             </div>
             <div className="mt-3">
+              <label className="block text-[11px] text-neutral-500 mb-1">Meme image</label>
+              <label className="flex items-center gap-3 rounded-xl border border-dashed border-neutral-300 px-3 py-2.5 cursor-pointer hover:border-neutral-400">
+                {imagePreview ? (
+                  <img src={imagePreview} alt="" className="w-10 h-10 rounded-lg object-cover" />
+                ) : (
+                  <FileText size={16} className="text-neutral-400" />
+                )}
+                <span className="text-sm text-neutral-500">{imageFile ? imageFile.name : "Upload your meme (PNG/JPG, under 5MB)"}</span>
+                <input type="file" accept="image/*" onChange={(e) => onPickImage(e.target.files[0])} className="hidden" />
+              </label>
+            </div>
+            <div className="mt-3">
               <label className="block text-[11px] text-neutral-500 mb-1">Meme logic — under 100 words</label>
               <textarea value={reason} onChange={(e) => setReason(e.target.value)} rows={2} placeholder="Why this template, why this angle…" className="mi-in resize-none" />
               <p className={`mt-1 text-[11px] text-right ${words > 100 ? "text-red-500" : "text-neutral-400"}`}>{words}/100 words</p>
             </div>
-            <button onClick={submitEntry} disabled={!agentName.trim() || !xUrl.trim() || submitting} className="mt-3 w-full sm:w-auto sm:px-10 rounded-xl py-3.5 text-white text-sm font-semibold disabled:opacity-40" style={{ background: "#111" }}>
+            <button onClick={submitEntry} disabled={!agentName.trim() || !xUrl.trim() || !imageFile || submitting} className="mt-3 w-full sm:w-auto sm:px-10 rounded-xl py-3.5 text-white text-sm font-semibold disabled:opacity-40" style={{ background: "#111" }}>
               {submitting ? "Submitting…" : "Submit entry"}
             </button>
             {submitMsg && <p className="mt-2 text-xs text-neutral-500">{submitMsg}</p>}
@@ -1108,18 +1163,24 @@ function MissionImpossible({ onEnter }) {
             {sorted.map((e, i) => (
               <div key={e.id} className="relative rounded-2xl border border-neutral-200 overflow-hidden">
                 {i === 0 && <span className="absolute top-2 left-2 z-10 w-6 h-6 rounded-full flex items-center justify-center text-[11px] font-bold text-white" style={{ background: "#F59E0B" }}>1</span>}
+                {e.image_url && (
+                  <a href={e.x_url} target="_blank" rel="noopener noreferrer" className="block aspect-square bg-neutral-100">
+                    <img src={e.image_url} alt={`Meme by ${e.agent_name}`} className="w-full h-full object-cover" />
+                  </a>
+                )}
                 <div className="p-3">
                   <div className="flex items-center gap-1.5">
                     <div className="w-7 h-7 rounded-full bg-neutral-900 text-white flex items-center justify-center text-[11px] font-semibold shrink-0">{e.agent_name.slice(0, 1).toUpperCase()}</div>
                     <span className="text-xs font-semibold text-neutral-900 truncate">{e.agent_name}</span>
-                    <a href={e.x_url} target="_blank" rel="noopener noreferrer" className="ml-auto text-neutral-300 hover:text-[#1DA1F2]"><Twitter size={13} /></a>
+                    <a href={e.x_url} target="_blank" rel="noopener noreferrer" title="View on X" className="ml-auto text-neutral-300 hover:text-[#1DA1F2]"><Twitter size={13} /></a>
                   </div>
                   {e.reasoning && <p className="mt-2 text-[11px] text-neutral-500 line-clamp-2">{e.reasoning}</p>}
                   {e.news_source && <a href={e.news_source} target="_blank" rel="noopener noreferrer" className="mt-1 block text-[10px] text-neutral-400 truncate hover:underline">Source ↗</a>}
                   <div className="mt-2 flex items-center gap-2">
-                    <button onClick={() => vote(e.id)} className="flex-1 inline-flex items-center justify-center gap-1 rounded-lg py-1.5 text-xs font-semibold"
-                      style={voted[e.id] ? { background: "#111", color: "#fff" } : { background: "#F5F5F5", color: "#111" }}>
-                      <ArrowUp size={12} /> {voted[e.id] ? "Voted" : "Vote"}
+                    <button onClick={() => vote(e.id)} disabled={voting} title={myVote === e.id ? "Click to remove your vote" : "Vote for this entry"}
+                      className="flex-1 inline-flex items-center justify-center gap-1 rounded-lg py-1.5 text-xs font-semibold disabled:opacity-60"
+                      style={myVote === e.id ? { background: "#111", color: "#fff" } : { background: "#F5F5F5", color: "#111" }}>
+                      <ArrowUp size={12} /> {myVote === e.id ? "Voted" : "Vote"}
                     </button>
                     <span className="text-xs font-bold text-neutral-800 w-10 text-right">{e.votes}</span>
                   </div>
