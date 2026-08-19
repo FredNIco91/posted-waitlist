@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { supabase, getVoterId } from "./supabaseClient";
 import {
   Carrot, ArrowRight, Sparkles, Check, Copy, Users, Share2, ShieldCheck,
@@ -706,6 +706,64 @@ function netlifySubmit(formName, data) {
   return fetch("/", { method: "POST", headers: { "Content-Type": "application/x-www-form-urlencoded" }, body }).catch(() => {});
 }
 
+const TURNSTILE_SITE_KEY = "0x4AAAAAAEVOraATqiWtNkuW";
+
+async function verifyTurnstile(token) {
+  if (!token) return false;
+  try {
+    const res = await fetch("/.netlify/functions/verify-turnstile", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ token }),
+    });
+    const data = await res.json();
+    return data.success === true;
+  } catch {
+    return false;
+  }
+}
+
+function TurnstileWidget({ onVerify, resetKey }) {
+  const containerRef = useRef(null);
+  const widgetIdRef = useRef(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    let pollId = null;
+
+    function renderWidget() {
+      if (cancelled || !containerRef.current || !window.turnstile) return;
+      widgetIdRef.current = window.turnstile.render(containerRef.current, {
+        sitekey: TURNSTILE_SITE_KEY,
+        callback: (token) => onVerify(token),
+        "expired-callback": () => onVerify(""),
+        "error-callback": () => onVerify(""),
+      });
+    }
+
+    if (window.turnstile) {
+      renderWidget();
+    } else {
+      pollId = setInterval(() => {
+        if (window.turnstile) {
+          clearInterval(pollId);
+          renderWidget();
+        }
+      }, 200);
+    }
+
+    return () => {
+      cancelled = true;
+      if (pollId) clearInterval(pollId);
+      if (widgetIdRef.current != null && window.turnstile) {
+        try { window.turnstile.remove(widgetIdRef.current); } catch {}
+      }
+    };
+  }, [resetKey]);
+
+  return <div ref={containerRef} className="my-1" />;
+}
+
 function Signup({ open, id }) {
   const [aud, setAud] = useState("user");
   const [email, setEmail] = useState("");
@@ -715,13 +773,26 @@ function Signup({ open, id }) {
   const [refs, setRefs] = useState(0);
   const [copied, setCopied] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [turnstileToken, setTurnstileToken] = useState("");
+  const [submitMsg, setSubmitMsg] = useState("");
   const emailOk = /\S+@\S+\.\S+/.test(email);
 
   const referredBy = new URLSearchParams(window.location.search).get("ref") || null;
 
   const submit = async () => {
     if (submitting) return;
+    if (aud === "user" && !turnstileToken) { setSubmitMsg("Please complete the verification above."); return; }
     setSubmitting(true);
+    setSubmitMsg("");
+    if (aud === "user") {
+      const ok = await verifyTurnstile(turnstileToken);
+      if (!ok) {
+        setSubmitMsg("Verification failed — please try again.");
+        setTurnstileToken("");
+        setSubmitting(false);
+        return;
+      }
+    }
     if (aud === "user" && emailOk) {
       const code = Math.random().toString(36).slice(2, 8);
       netlifySubmit("waitlist-user", { email });
@@ -773,9 +844,11 @@ function Signup({ open, id }) {
               <div className="space-y-2.5">
                 <input value={email} onChange={(e) => setEmail(e.target.value)} onKeyDown={(e) => e.key === "Enter" && submit()} placeholder="you@email.com" className="wl-in" />
                 {aud === "inv" && <textarea value={note} onChange={(e) => setNote(e.target.value)} rows={2} placeholder="A line about what you're looking for…" className="wl-in resize-none" />}
-                <button onClick={submit} disabled={!emailOk || submitting} className="w-full rounded-xl py-3 text-white font-semibold disabled:opacity-40" style={{ background: "#111" }}>
+                {aud === "user" && <TurnstileWidget onVerify={setTurnstileToken} resetKey={aud} />}
+                <button onClick={submit} disabled={!emailOk || (aud === "user" && !turnstileToken) || submitting} className="w-full rounded-xl py-3 text-white font-semibold disabled:opacity-40" style={{ background: "#111" }}>
                   {aud === "user" ? "Join waitlist" : "Contact us"}
                 </button>
+                {submitMsg && <p className="text-xs text-red-500 text-center">{submitMsg}</p>}
               </div>
               <p className="mt-2.5 text-xs text-neutral-400 text-center">
                 {aud === "user" && "Free to join · 700 🥕 for founding members"}
@@ -921,6 +994,16 @@ function MissionImpossible({ onEnter }) {
   const submitEntry = async () => {
     if (!agentName.trim() || !xUrl.trim() || !imageFile || submitting) return;
     setSubmitting(true);
+    setSubmitMsg("");
+
+    // Fail fast if this agent already has an entry, before wasting a storage upload
+    const { data: existing } = await supabase.from("mi_entries").select("id").ilike("agent_name", agentName.trim()).maybeSingle();
+    if (existing) {
+      setSubmitMsg("This agent has already submitted an entry — one entry per agent.");
+      setSubmitting(false);
+      return;
+    }
+
     const path = `${Date.now()}-${imageFile.name.replace(/[^a-zA-Z0-9.]/g, "_")}`;
     const { error: uploadError } = await supabase.storage.from("mi-memes").upload(path, imageFile);
     if (uploadError) {
@@ -934,8 +1017,12 @@ function MissionImpossible({ onEnter }) {
       .insert({ agent_name: agentName.trim(), news_source: srcUrl.trim() || null, x_url: xUrl.trim(), reasoning: reason.trim() || null, image_url: publicUrl })
       .select().single();
     if (error) {
-      console.error("mi_entries insert failed:", error.message);
-      setSubmitMsg("Something went wrong — please try again.");
+      if (error.code === "23505") {
+        setSubmitMsg("This agent has already submitted an entry — one entry per agent.");
+      } else {
+        console.error("mi_entries insert failed:", error.message);
+        setSubmitMsg("Something went wrong — please try again.");
+      }
     } else {
       setEntries((es) => [...es, data]);
       setAgentName(""); setSrcUrl(""); setXUrl(""); setReason(""); setImageFile(null); setImagePreview("");
