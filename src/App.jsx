@@ -1156,6 +1156,15 @@ const CATEGORIES = [
   { id: "singapore", name: "Singapore Mission", icon: MapPin, c: "#DC2626" },
 ];
 const LLMS = ["GPT", "Claude", "Gemini", "Llama", "Open Source"];
+const COUNTRIES = [
+  "Singapore", "Malaysia", "Indonesia", "Thailand", "Vietnam", "Philippines", "Myanmar", "Cambodia", "Laos", "Brunei",
+  "India", "China", "Japan", "South Korea", "Taiwan", "Hong Kong", "Australia", "New Zealand",
+  "United States", "Canada", "United Kingdom", "Ireland", "Germany", "France", "Netherlands", "Spain", "Italy", "Switzerland", "Sweden", "Norway", "Denmark", "Finland", "Poland",
+  "United Arab Emirates", "Saudi Arabia", "Israel", "Turkey",
+  "Brazil", "Mexico", "Argentina",
+  "South Africa", "Nigeria", "Kenya", "Egypt",
+  "Other",
+];
 
 function ARProgress({ step, total }) {
   return (
@@ -1189,7 +1198,7 @@ function AgentRegisterFlow({ defaultEnterMI = false }) {
 
   const emailOk = /\S+@\S+\.\S+/.test(email);
   const step1Ok = agentName.trim() && category && llm;
-  const step2Ok = name.trim() && emailOk;
+  const step2Ok = name.trim() && emailOk && country;
   const catObj = CATEGORIES.find((c) => c.id === category);
   const next = () => setStep((s) => Math.min(s + 1, 2));
   const back = () => setStep((s) => Math.max(s - 1, 0));
@@ -1259,7 +1268,12 @@ function AgentRegisterFlow({ defaultEnterMI = false }) {
         <div className="space-y-3.5">
           <ARField label="Your name"><input value={name} onChange={(e) => setName(e.target.value)} placeholder="Full name" className="wl-in" /></ARField>
           <ARField label="Email"><input value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@email.com" className="wl-in" /></ARField>
-          <ARField label="Country"><input value={country} onChange={(e) => setCountry(e.target.value)} placeholder="e.g. Singapore" className="wl-in" /></ARField>
+          <ARField label="Country">
+            <select value={country} onChange={(e) => setCountry(e.target.value)} className="wl-in">
+              <option value="" disabled>Select a country</option>
+              {COUNTRIES.map((c) => <option key={c} value={c}>{c}</option>)}
+            </select>
+          </ARField>
         </div>
       )}
 
@@ -1289,13 +1303,13 @@ function AgentRegisterFlow({ defaultEnterMI = false }) {
             Continue <ArrowRight size={15} />
           </button>
         ) : (
-          <button onClick={async () => {
-            const categoryLabel = catObj ? catObj.label : category;
+          <button disabled={!step1Ok || !step2Ok} onClick={async () => {
+            const categoryLabel = catObj ? catObj.name : category;
             netlifySubmit("waitlist-agent", { agentName, category: categoryLabel, llm, builderName: name, email, country, enterMI: enterMI ? "yes" : "no" });
             const { error } = await supabase.from("agent_registrations").insert({ agent_name: agentName, category: categoryLabel, llm, builder_name: name, email, country, enter_mi: enterMI });
             if (error) console.error("agent_registrations insert failed:", error.message);
             setDone(true);
-          }} className="flex-1 inline-flex items-center justify-center gap-2 rounded-xl py-2.5 text-white font-semibold" style={{ background: "linear-gradient(135deg,#4C1D95,#7C2D92)" }}>
+          }} className="flex-1 inline-flex items-center justify-center gap-2 rounded-xl py-2.5 text-white font-semibold disabled:opacity-40" style={{ background: "linear-gradient(135deg,#4C1D95,#7C2D92)" }}>
             Register agent <ArrowRight size={15} />
           </button>
         )}
