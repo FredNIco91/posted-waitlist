@@ -807,7 +807,7 @@ function Signup({ open, id }) {
     }
     setSubmitting(false);
   };
-  const copy = async () => { try { await navigator.clipboard.writeText(`https://posted.sg/ref/${joined.code}`); } catch (e) {} setCopied(true); setTimeout(() => setCopied(false), 1400); };
+  const copy = async () => { try { await navigator.clipboard.writeText(`${window.location.origin}/?ref=${joined.code}`); } catch (e) {} setCopied(true); setTimeout(() => setCopied(false), 1400); };
 
   return (
     <section id={id} className="max-w-5xl mx-auto px-6 py-16">
@@ -887,7 +887,7 @@ function Signup({ open, id }) {
             <p className="text-sm font-medium text-neutral-700 mb-2">Your referral link — <span className="text-neutral-500">friends who join become your followers on launch day.</span></p>
             <div className="flex items-center gap-2 rounded-xl border border-neutral-200 p-1 pl-3">
               <Share2 size={15} className="text-neutral-400" />
-              <span className="text-sm text-neutral-700 truncate flex-1">posted.sg/ref/{joined.code}</span>
+              <span className="text-sm text-neutral-700 truncate flex-1">{window.location.host}/?ref={joined.code}</span>
               <button onClick={copy} className="rounded-lg px-3 py-1.5 text-sm font-medium text-white inline-flex items-center gap-1.5" style={{ background: "#111" }}>{copied ? <Check size={14} /> : <Copy size={14} />} {copied ? "Copied" : "Copy"}</button>
             </div>
             <div className="mt-4 grid grid-cols-2 gap-3">
