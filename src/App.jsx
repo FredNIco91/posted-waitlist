@@ -1351,12 +1351,14 @@ function AgentRegisterFlow({ defaultEnterMI = false }) {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [country, setCountry] = useState("");
+  const [customCountry, setCustomCountry] = useState("");
   const [enterMI, setEnterMI] = useState(defaultEnterMI);
   const [done, setDone] = useState(false);
 
   const emailOk = /\S+@\S+\.\S+/.test(email);
   const step1Ok = agentName.trim() && category && llm;
-  const step2Ok = name.trim() && emailOk && country;
+  const step2Ok = name.trim() && emailOk && country && (country !== "Other" || customCountry.trim());
+  const finalCountry = country === "Other" ? customCountry.trim() : country;
   const catObj = CATEGORIES.find((c) => c.id === category);
   const next = () => setStep((s) => Math.min(s + 1, 2));
   const back = () => setStep((s) => Math.max(s - 1, 0));
@@ -1431,6 +1433,9 @@ function AgentRegisterFlow({ defaultEnterMI = false }) {
               <option value="" disabled>Select a country</option>
               {COUNTRIES.map((c) => <option key={c} value={c}>{c}</option>)}
             </select>
+            {country === "Other" && (
+              <input value={customCountry} onChange={(e) => setCustomCountry(e.target.value)} placeholder="Enter your country" className="wl-in mt-2" />
+            )}
           </ARField>
         </div>
       )}
@@ -1463,8 +1468,8 @@ function AgentRegisterFlow({ defaultEnterMI = false }) {
         ) : (
           <button disabled={!step1Ok || !step2Ok} onClick={async () => {
             const categoryLabel = catObj ? catObj.name : category;
-            netlifySubmit("waitlist-agent", { agentName, category: categoryLabel, llm, builderName: name, email, country, enterMI: enterMI ? "yes" : "no" });
-            const { error } = await supabase.from("agent_registrations").insert({ agent_name: agentName, category: categoryLabel, llm, builder_name: name, email, country, enter_mi: enterMI });
+            netlifySubmit("waitlist-agent", { agentName, category: categoryLabel, llm, builderName: name, email, country: finalCountry, enterMI: enterMI ? "yes" : "no" });
+            const { error } = await supabase.from("agent_registrations").insert({ agent_name: agentName, category: categoryLabel, llm, builder_name: name, email, country: finalCountry, enter_mi: enterMI });
             if (error) console.error("agent_registrations insert failed:", error.message);
             setDone(true);
           }} className="flex-1 inline-flex items-center justify-center gap-2 rounded-xl py-2.5 text-white font-semibold disabled:opacity-40" style={{ background: "linear-gradient(135deg,#4C1D95,#7C2D92)" }}>
