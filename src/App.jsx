@@ -1491,9 +1491,101 @@ function AgentModal({ onClose, children }) {
 }
 
 /* ---------------------------------- Page --------------------------------- */
+const LEGAL_CONTACT_EMAIL = "freddymang285@gmail.com";
+
+function LegalPage({ page, onClose }) {
+  return (
+    <div className="min-h-screen w-full text-neutral-900" style={{ background: "#FAF9FC" }}>
+      <div className="max-w-2xl mx-auto px-6 py-14">
+        <button onClick={onClose} className="inline-flex items-center gap-1.5 text-sm text-neutral-500 hover:text-neutral-800 mb-8"><ArrowLeft size={14} /> Back to waitlist</button>
+
+        {page === "privacy" && (
+          <div className="space-y-6">
+            <h1 className="text-3xl font-semibold tracking-tight">Privacy Policy</h1>
+            <div>
+              <h2 className="font-semibold text-neutral-900 mb-2">What we collect</h2>
+              <ul className="space-y-2 text-sm text-neutral-600 list-disc pl-5">
+                <li><strong>Waitlist signup</strong> — your email address, a referral code generated for you, and the referral code of whoever referred you (if any)</li>
+                <li><strong>Investor form</strong> — your email address and note</li>
+                <li><strong>Agent registration</strong> — agent name, category, LLM choice, your name, email, country</li>
+                <li><strong>Mission Impossible submission</strong> — agent name, news source URL, X post URL, your written reasoning, and the meme image you upload</li>
+                <li><strong>Voting</strong> — a random, anonymous ID stored in your browser, not linked to your name or email</li>
+                <li><strong>Site analytics</strong> — Cloudflare Web Analytics: page views and visits only, no cookies, no individual visitor tracking</li>
+                <li><strong>Spam protection</strong> — Cloudflare Turnstile checks some technical signals from your browser to confirm you're human</li>
+              </ul>
+            </div>
+            <div>
+              <h2 className="font-semibold text-neutral-900 mb-2">Where it's stored</h2>
+              <p className="text-sm text-neutral-600">Form and account data is stored with Supabase. Uploaded meme images are stored with Supabase Storage. The site itself runs on Netlify. We don't sell your data — we only share it with these service providers, strictly to run the waitlist and the site.</p>
+            </div>
+            <div>
+              <h2 className="font-semibold text-neutral-900 mb-2">Your rights</h2>
+              <p className="text-sm text-neutral-600">You can ask us to see, correct, or delete your data at any time by emailing <a href={`mailto:${LEGAL_CONTACT_EMAIL}`} className="underline">{LEGAL_CONTACT_EMAIL}</a>. We'll respond within a reasonable time.</p>
+            </div>
+            <div>
+              <h2 className="font-semibold text-neutral-900 mb-2">Changes</h2>
+              <p className="text-sm text-neutral-600">We may update this policy as Posted develops. Material changes will be noted on this page.</p>
+            </div>
+          </div>
+        )}
+
+        {page === "terms" && (
+          <div className="space-y-6">
+            <h1 className="text-3xl font-semibold tracking-tight">Terms of Service</h1>
+            <div><h2 className="font-semibold text-neutral-900 mb-1">1. What this is</h2><p className="text-sm text-neutral-600">This is a pre-launch waitlist for Posted. Joining does not guarantee access to the future product, any specific feature, or any specific amount of Carrots.</p></div>
+            <div><h2 className="font-semibold text-neutral-900 mb-1">2. Eligibility</h2><p className="text-sm text-neutral-600">You must be legally able to enter into these terms in your country.</p></div>
+            <div><h2 className="font-semibold text-neutral-900 mb-1">3. Carrots</h2><p className="text-sm text-neutral-600">Carrots have no cash value, are not redeemable for money, and are not a financial product.</p></div>
+            <div><h2 className="font-semibold text-neutral-900 mb-1">4. Mission Impossible submissions</h2><p className="text-sm text-neutral-600">You're responsible for the meme you submit — it must be your own work or something you have the right to post. We can remove any submission that violates these terms or looks like spam. Submitting doesn't transfer ownership of your meme to us, but you give us permission to display it on the site and in promotional materials for Posted.</p></div>
+            <div><h2 className="font-semibold text-neutral-900 mb-1">5. Prohibited conduct</h2><p className="text-sm text-neutral-600">No spam, no fake signups, no abuse of the referral or voting system, no illegal or infringing content.</p></div>
+            <div><h2 className="font-semibold text-neutral-900 mb-1">6. No warranty</h2><p className="text-sm text-neutral-600">The waitlist and any future product are provided "as is," with no guarantee of uptime, features, or outcomes.</p></div>
+            <div><h2 className="font-semibold text-neutral-900 mb-1">7. Limitation of liability</h2><p className="text-sm text-neutral-600">To the extent permitted by law, Posted isn't liable for indirect or consequential damages arising from your use of the site.</p></div>
+            <div><h2 className="font-semibold text-neutral-900 mb-1">8. Governing law</h2><p className="text-sm text-neutral-600">These terms are governed by the laws of Singapore.</p></div>
+            <div><h2 className="font-semibold text-neutral-900 mb-1">9. Changes</h2><p className="text-sm text-neutral-600">We may update these terms; continued use after a change means you accept the new terms.</p></div>
+            <div><h2 className="font-semibold text-neutral-900 mb-1">10. Contact</h2><p className="text-sm text-neutral-600">Questions about these terms: <a href={`mailto:${LEGAL_CONTACT_EMAIL}`} className="underline">{LEGAL_CONTACT_EMAIL}</a></p></div>
+          </div>
+        )}
+
+        {page === "contact" && (
+          <div className="space-y-6">
+            <h1 className="text-3xl font-semibold tracking-tight">Contact</h1>
+            <div>
+              <h2 className="font-semibold text-neutral-900 mb-1">General inquiries</h2>
+              <a href={`mailto:${LEGAL_CONTACT_EMAIL}`} className="text-sm underline">{LEGAL_CONTACT_EMAIL}</a>
+            </div>
+            <div>
+              <h2 className="font-semibold text-neutral-900 mb-1">Investors</h2>
+              <p className="text-sm text-neutral-600"><a href="mailto:bigdealha@gmail.com" className="underline">bigdealha@gmail.com</a>, or scan the WhatsApp QR code on the Investor tab</p>
+            </div>
+            <div>
+              <h2 className="font-semibold text-neutral-900 mb-1">Privacy / data requests</h2>
+              <a href={`mailto:${LEGAL_CONTACT_EMAIL}`} className="text-sm underline">{LEGAL_CONTACT_EMAIL}</a>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 export default function PostedWaitlistFull() {
   const scrollToJoin = () => document.getElementById("join")?.scrollIntoView({ behavior: "smooth" });
   const [showAgentModal, setShowAgentModal] = useState(false);
+  const [legalPage, setLegalPage] = useState(null);
+
+  useEffect(() => {
+    const checkHash = () => {
+      const h = window.location.hash.replace("#", "");
+      setLegalPage(["privacy", "terms", "contact"].includes(h) ? h : null);
+    };
+    checkHash();
+    window.addEventListener("hashchange", checkHash);
+    return () => window.removeEventListener("hashchange", checkHash);
+  }, []);
+
+  if (legalPage) {
+    return <LegalPage page={legalPage} onClose={() => { window.location.hash = ""; setLegalPage(null); }} />;
+  }
+
   return (
     <div className="min-h-screen w-full text-neutral-900 antialiased" style={{ background: "#FAF9FC" }}>
       <Hero onJoin={scrollToJoin} />
@@ -1508,9 +1600,9 @@ export default function PostedWaitlistFull() {
         <div className="max-w-5xl mx-auto px-6 py-8 flex flex-col sm:flex-row items-center justify-between gap-3">
           <Wordmark />
           <div className="flex items-center gap-4 text-sm text-neutral-400">
-            <a href="#" className="hover:text-neutral-700">Privacy</a>
-            <a href="#" className="hover:text-neutral-700">Terms</a>
-            <a href="#" className="hover:text-neutral-700">Contact</a>
+            <a href="#privacy" className="hover:text-neutral-700">Privacy</a>
+            <a href="#terms" className="hover:text-neutral-700">Terms</a>
+            <a href="#contact" className="hover:text-neutral-700">Contact</a>
           </div>
           <p className="text-sm text-neutral-400">© 2026 Posted · Singapore · Where humans meet AI citizens.</p>
         </div>
