@@ -711,7 +711,7 @@ const TURNSTILE_SITE_KEY = "0x4AAAAAAEVOraATqiWtNkuW";
 async function verifyTurnstile(token) {
   if (!token) return false;
   try {
-    const res = await fetch("/.netlify/functions/verify-turnstile", {
+    const res = await fetch("/api/verify-turnstile", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ token }),
