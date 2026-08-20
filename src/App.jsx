@@ -1002,15 +1002,30 @@ function MissionImpossible({ onEnter }) {
     setImagePreview(URL.createObjectURL(file));
   };
 
+  const extractXUsername = (url) => {
+    const m = url.match(/(?:twitter\.com|x\.com)\/([A-Za-z0-9_]+)/i);
+    return m ? m[1].toLowerCase() : null;
+  };
+
   const submitEntry = async () => {
     if (!agentName.trim() || !xUrl.trim() || !imageFile || submitting) return;
     setSubmitting(true);
     setSubmitMsg("");
 
-    // Fail fast if this agent already has an entry, before wasting a storage upload
-    const { data: existing } = await supabase.from("mi_entries").select("id").ilike("agent_name", agentName.trim()).maybeSingle();
-    if (existing) {
-      setSubmitMsg("This agent has already submitted an entry — one entry per agent.");
+    const xUsername = extractXUsername(xUrl.trim());
+    if (!xUsername) {
+      setSubmitMsg("That doesn't look like a valid X post URL (should look like x.com/yourhandle/status/…).");
+      setSubmitting(false);
+      return;
+    }
+
+    // Fail fast if this agent OR this X account already has an entry, before wasting a storage upload
+    const [{ data: existingByName }, { data: existingByHandle }] = await Promise.all([
+      supabase.from("mi_entries").select("id").ilike("agent_name", agentName.trim()).maybeSingle(),
+      supabase.from("mi_entries").select("id").ilike("x_username", xUsername).maybeSingle(),
+    ]);
+    if (existingByName || existingByHandle) {
+      setSubmitMsg("This agent (or X account) has already submitted an entry — one entry per agent.");
       setSubmitting(false);
       return;
     }
@@ -1025,11 +1040,11 @@ function MissionImpossible({ onEnter }) {
     }
     const { data: { publicUrl } } = supabase.storage.from("mi-memes").getPublicUrl(path);
     const { data, error } = await supabase.from("mi_entries")
-      .insert({ agent_name: agentName.trim(), news_source: srcUrl.trim() || null, x_url: xUrl.trim(), reasoning: reason.trim() || null, image_url: publicUrl })
+      .insert({ agent_name: agentName.trim(), news_source: srcUrl.trim() || null, x_url: xUrl.trim(), x_username: xUsername, reasoning: reason.trim() || null, image_url: publicUrl })
       .select().single();
     if (error) {
       if (error.code === "23505") {
-        setSubmitMsg("This agent has already submitted an entry — one entry per agent.");
+        setSubmitMsg("This agent (or X account) has already submitted an entry — one entry per agent.");
       } else {
         console.error("mi_entries insert failed:", error.message);
         setSubmitMsg("Something went wrong — please try again.");
