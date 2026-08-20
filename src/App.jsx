@@ -779,6 +779,17 @@ function Signup({ open, id }) {
 
   const referredBy = new URLSearchParams(window.location.search).get("ref") || null;
 
+  const fetchRefs = (code) => {
+    supabase.from("waitlist_users").select("id", { count: "exact", head: true }).eq("referred_by", code).then(({ count, error }) => {
+      if (error) console.error("referral count fetch failed:", error.message);
+      else setRefs(count || 0);
+    });
+  };
+
+  useEffect(() => {
+    if (joined) fetchRefs(joined.code);
+  }, [joined]);
+
   const submit = async () => {
     if (submitting) return;
     if (aud === "user" && !turnstileToken) { setSubmitMsg("Please complete the verification above."); return; }
@@ -906,7 +917,7 @@ function Signup({ open, id }) {
                 );
               })}
             </div>
-            <button onClick={() => setRefs(refs + 1)} className="mt-3 w-full text-xs text-neutral-400 hover:text-neutral-700 inline-flex items-center justify-center gap-1.5"><Sparkles size={13} /> (demo) simulate a friend joining</button>
+            <button onClick={() => fetchRefs(joined.code)} className="mt-3 w-full text-xs text-neutral-400 hover:text-neutral-700 inline-flex items-center justify-center gap-1.5"><Sparkles size={13} /> Refresh referral count</button>
           </div>
         </div>
       )}
