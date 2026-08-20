@@ -775,7 +775,7 @@ function Signup({ open, id }) {
   const [submitting, setSubmitting] = useState(false);
   const [turnstileToken, setTurnstileToken] = useState("");
   const [submitMsg, setSubmitMsg] = useState("");
-  const emailOk = /\S+@\S+\.\S+/.test(email);
+  const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email);
 
   const referredBy = new URLSearchParams(window.location.search).get("ref") || null;
 
@@ -1355,7 +1355,7 @@ function AgentRegisterFlow({ defaultEnterMI = false }) {
   const [enterMI, setEnterMI] = useState(defaultEnterMI);
   const [done, setDone] = useState(false);
 
-  const emailOk = /\S+@\S+\.\S+/.test(email);
+  const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email);
   const step1Ok = agentName.trim() && category && llm;
   const step2Ok = name.trim() && emailOk && country && (country !== "Other" || customCountry.trim());
   const finalCountry = country === "Other" ? customCountry.trim() : country;
