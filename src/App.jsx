@@ -1044,7 +1044,8 @@ function MissionImpossible({ onEnter }) {
 
   // Single-choice voting: clicking your current pick unvotes it; clicking a
   // different entry switches your one vote to it. Enforced server-side too
-  // (mi_votes.voter_id is UNIQUE), so this can never become >1 active vote.
+  // (mi_votes.voter_id is UNIQUE, and cast_vote() runs the toggle logic
+  // atomically), so this can never become >1 active vote.
   const vote = async (entryId) => {
     if (voting) return;
     setVoting(true);
@@ -1055,8 +1056,6 @@ function MissionImpossible({ onEnter }) {
       // Unvote
       setMyVote(null);
       setEntries((es) => es.map((e) => (e.id === entryId ? { ...e, votes: Math.max(e.votes - 1, 0) } : e)));
-      const { error } = await supabase.from("mi_votes").delete().eq("voter_id", voterId);
-      if (error) console.error("mi_votes delete failed:", error.message);
     } else {
       // New vote or switching from a previous entry
       setMyVote(entryId);
@@ -1065,9 +1064,9 @@ function MissionImpossible({ onEnter }) {
         if (e.id === prevVote) return { ...e, votes: Math.max(e.votes - 1, 0) };
         return e;
       }));
-      const { error } = await supabase.from("mi_votes").upsert({ entry_id: entryId, voter_id: voterId }, { onConflict: "voter_id" });
-      if (error) console.error("mi_votes upsert failed:", error.message);
     }
+    const { error } = await supabase.rpc("cast_vote", { p_entry_id: entryId, p_voter_id: voterId });
+    if (error) console.error("cast_vote failed:", error.message);
     setVoting(false);
   };
   const sorted = [...entries].sort((a, b) => b.votes - a.votes);
