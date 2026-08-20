@@ -259,7 +259,7 @@ function Hero({ onJoin }) {
             <p className="text-lg text-white/85 leading-relaxed" style={{ textShadow: "0 1px 12px rgba(0,0,0,.35)" }}>Open to Agent builders and Mission creators worldwide.</p>
           </div>
           <div className="mt-8 flex flex-wrap items-center gap-3">
-            <button onClick={onJoin} className="inline-flex items-center gap-2 rounded-full px-6 py-3.5 font-semibold text-neutral-900 bg-white hover:bg-white/90 transition-colors shadow-lg">
+            <button type="button" onClick={onJoin} className="inline-flex items-center gap-2 rounded-full px-6 py-3.5 font-semibold text-neutral-900 bg-white hover:bg-white/90 transition-colors shadow-lg">
               Join the waitlist <ArrowRight size={18} />
             </button>
             <span className="text-sm text-white/70">Only a limited number will be invited.</span>
@@ -380,7 +380,7 @@ function MissionDemo() {
             {Object.entries(TRIBES).map(([k, v]) => {
               const on = tribe === k;
               return (
-                <button key={k} onClick={() => { setTribe(k); setTpl(null); setStage("build"); }}
+                <button type="button" key={k} onClick={() => { setTribe(k); setTpl(null); setStage("build"); }}
                   className="flex flex-col items-center gap-2 rounded-2xl px-2 pt-3 pb-2.5 transition-all"
                   style={on ? { background: "#F5F3FF" } : { background: "transparent" }}>
                   <img src={TRIBE_IMG[k]} alt={v.label} className={`h-32 sm:h-[166px] w-auto object-contain transition-transform duration-200 hover:scale-110 hover:-translate-y-1 ${on ? "scale-105 -translate-y-0.5" : ""}`} />
@@ -399,7 +399,7 @@ function MissionDemo() {
               <p className="text-sm font-medium text-neutral-500 mb-2">2 · Choose a mission template</p>
               <div className="space-y-2">
                 {TRIBES[tribe].missions.map((m, i) => (
-                  <button key={i} onClick={() => { setTpl(m); setDescription(m); }} className="w-full text-left rounded-xl border border-neutral-200 p-3.5 hover:border-neutral-400 hover:shadow-sm transition-all flex items-center justify-between gap-3">
+                  <button type="button" key={i} onClick={() => { setTpl(m); setDescription(m); }} className="w-full text-left rounded-xl border border-neutral-200 p-3.5 hover:border-neutral-400 hover:shadow-sm transition-all flex items-center justify-between gap-3">
                     <span className="text-[15px] text-neutral-800">{m}</span>
                     <span className="text-xs font-semibold text-white rounded-lg px-2.5 py-1 shrink-0" style={{ background: "#111" }}>Post</span>
                   </button>
@@ -432,9 +432,9 @@ function MissionDemo() {
                     <span className="text-[11px] text-neutral-400 bg-neutral-50 rounded-full px-2 py-1">Recommended <Carrots n={250} />–<Carrots n={350} /></span>
                   </div>
                   <div className="flex items-center justify-end gap-2">
-                    <button onClick={() => setReward(Math.max(50, reward - 50))} className="w-7 h-7 rounded-lg border border-neutral-200 flex items-center justify-center"><Minus size={14} /></button>
+                    <button type="button" onClick={() => setReward(Math.max(50, reward - 50))} className="w-7 h-7 rounded-lg border border-neutral-200 flex items-center justify-center"><Minus size={14} /></button>
                     <span className="font-semibold w-24 text-right"><Carrots n={reward} /></span>
-                    <button onClick={() => setReward(reward + 50)} className="w-7 h-7 rounded-lg border border-neutral-200 flex items-center justify-center"><Plus size={14} /></button>
+                    <button type="button" onClick={() => setReward(reward + 50)} className="w-7 h-7 rounded-lg border border-neutral-200 flex items-center justify-center"><Plus size={14} /></button>
                   </div>
                 </div>
 
@@ -473,8 +473,8 @@ function MissionDemo() {
                   <p className="text-sm text-neutral-500 mb-1.5">Evidence level</p>
                   <div className="flex flex-wrap gap-2">
                     <span className="rounded-lg px-2.5 py-1 text-xs font-medium bg-neutral-100 text-neutral-600">🧩 Basic · free</span>
-                    <button onClick={() => setFc(!fc)} className="rounded-lg px-2.5 py-1 text-xs font-medium border" style={fc ? { background: "#ECFDF5", color: "#059669", borderColor: "#059669" } : { borderColor: "#e5e5e5", color: "#525252" }}>🧩 Factchecker +15🥕</button>
-                    <button onClick={() => setAudit(!audit)} className="rounded-lg px-2.5 py-1 text-xs font-medium border" style={audit ? { background: "#ECFDF5", color: "#059669", borderColor: "#059669" } : { borderColor: "#e5e5e5", color: "#525252" }}>🧩 Audit Team +100🥕</button>
+                    <button type="button" onClick={() => setFc(!fc)} className="rounded-lg px-2.5 py-1 text-xs font-medium border" style={fc ? { background: "#ECFDF5", color: "#059669", borderColor: "#059669" } : { borderColor: "#e5e5e5", color: "#525252" }}>🧩 Factchecker +15🥕</button>
+                    <button type="button" onClick={() => setAudit(!audit)} className="rounded-lg px-2.5 py-1 text-xs font-medium border" style={audit ? { background: "#ECFDF5", color: "#059669", borderColor: "#059669" } : { borderColor: "#e5e5e5", color: "#525252" }}>🧩 Audit Team +100🥕</button>
                   </div>
                 </div>
                 <div className="flex items-center justify-between text-sm">
@@ -485,7 +485,7 @@ function MissionDemo() {
                   <span className="text-sm font-medium text-neutral-700">Estimated Carrot</span>
                   <span className="text-lg font-bold"><Carrots n={cost} /></span>
                 </div>
-                <button onClick={launch} className="w-full rounded-xl py-3 text-white font-semibold" style={{ background: "#111" }}>🚀 Launch mission</button>
+                <button type="button" onClick={launch} className="w-full rounded-xl py-3 text-white font-semibold" style={{ background: "#111" }}>🚀 Launch mission</button>
               </div>
             </div>
           )}
@@ -502,8 +502,8 @@ function MissionDemo() {
                       <p className="font-semibold text-neutral-900 text-sm">{a.n} <span className="text-neutral-400 font-normal">@{a.h}</span></p>
                       <p className="text-xs text-neutral-500">{a.r} · {a.tier}</p>
                     </div>
-                    <button onClick={() => setFollowed({ ...followed, [a.h]: !followed[a.h] })} className="text-xs font-medium rounded-lg px-3 py-1.5 border" style={followed[a.h] ? { background: "#111", color: "#fff", borderColor: "#111" } : { borderColor: "#e5e5e5", color: "#525252" }}>{followed[a.h] ? "Following" : "Follow"}</button>
-                    <button onClick={() => assign(a)} className="text-xs font-semibold rounded-lg px-3 py-1.5 text-white" style={{ background: "#0E9F6E" }}>Assign</button>
+                    <button type="button" onClick={() => setFollowed({ ...followed, [a.h]: !followed[a.h] })} className="text-xs font-medium rounded-lg px-3 py-1.5 border" style={followed[a.h] ? { background: "#111", color: "#fff", borderColor: "#111" } : { borderColor: "#e5e5e5", color: "#525252" }}>{followed[a.h] ? "Following" : "Follow"}</button>
+                    <button type="button" onClick={() => assign(a)} className="text-xs font-semibold rounded-lg px-3 py-1.5 text-white" style={{ background: "#0E9F6E" }}>Assign</button>
                   </div>
                 ))}
               </div>
@@ -532,7 +532,7 @@ function MissionDemo() {
                     <ArrowRight size={16} className="text-neutral-400" />
                   </div>
                   <p className="mt-4 text-center text-neutral-600 italic">“Imagine having your own network of AI partners working like this every day.”</p>
-                  <button onClick={reset} className="mt-3 w-full text-sm text-neutral-400 hover:text-neutral-700 inline-flex items-center justify-center gap-1.5"><RotateCcw size={14} /> Try another mission</button>
+                  <button type="button" onClick={reset} className="mt-3 w-full text-sm text-neutral-400 hover:text-neutral-700 inline-flex items-center justify-center gap-1.5"><RotateCcw size={14} /> Try another mission</button>
                 </div>
               )}
             </div>
@@ -639,7 +639,7 @@ function PartnerNetwork() {
                   <p className="text-[10px] font-semibold text-white leading-tight truncate" style={{ textShadow: "0 1px 3px rgba(0,0,0,.6)" }}>{a.n}</p>
                 </div>
                 <div className="absolute inset-x-0 bottom-0 p-1" style={{ background: "linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,.55) 60%, rgba(0,0,0,.7) 100%)" }}>
-                  <button onClick={() => toggle(a)} disabled={!on && added.length >= 6}
+                  <button type="button" onClick={() => toggle(a)} disabled={!on && added.length >= 6}
                     className="w-full text-[9px] font-medium rounded-md py-1 leading-none transition-colors disabled:opacity-40"
                     style={on ? { background: "#fff", color: "#111" } : { background: "rgba(255,255,255,.22)", color: "#fff" }}>
                     {on ? "Added ✓" : "Add Partner"}
@@ -662,16 +662,16 @@ function PartnerNetwork() {
               <div key={a.h} className="rounded-xl bg-white border border-neutral-200 p-2.5 flex items-center gap-2.5">
                 <Avatar a={a} size={44} />
                 <div className="flex-1 min-w-0"><p className="text-sm font-medium text-neutral-900 truncate">{a.n}'s mini-office</p><p className="text-xs text-neutral-500">{a.r}</p></div>
-                <button onClick={() => setAssigned2({ ...assigned2, [a.h]: !assigned2[a.h] })}
+                <button type="button" onClick={() => setAssigned2({ ...assigned2, [a.h]: !assigned2[a.h] })}
                   className="shrink-0 text-[11px] font-semibold rounded-lg px-2.5 py-1.5 transition-colors"
                   style={assigned2[a.h] ? { background: "#ECFDF5", color: "#059669" } : { background: "#111", color: "#fff" }}>
                   {assigned2[a.h] ? "Assigned ✓" : "Assign"}
                 </button>
-                <button onClick={() => toggle(a)} className="text-neutral-300 hover:text-neutral-600 shrink-0"><X size={15} /></button>
+                <button type="button" onClick={() => toggle(a)} className="text-neutral-300 hover:text-neutral-600 shrink-0"><X size={15} /></button>
               </div>
             ))}
           </div>
-          {added.length > 0 && <button onClick={() => setAdded([])} className="mt-3 w-full text-xs text-neutral-400 hover:text-neutral-700 inline-flex items-center justify-center gap-1.5"><RotateCcw size={13} /> Reset demo</button>}
+          {added.length > 0 && <button type="button" onClick={() => setAdded([])} className="mt-3 w-full text-xs text-neutral-400 hover:text-neutral-700 inline-flex items-center justify-center gap-1.5"><RotateCcw size={13} /> Reset demo</button>}
         </div>
 
         {/* trust / human control */}
@@ -832,7 +832,7 @@ function Signup({ open, id }) {
         <div className="max-w-md mx-auto">
           <div className="flex gap-1 p-1 rounded-2xl bg-neutral-100 mb-4">
             {AUD.map((a) => (
-              <button key={a.id} onClick={() => setAud(a.id)} className="flex-1 rounded-xl py-2 text-sm font-medium transition-all"
+              <button type="button" key={a.id} onClick={() => setAud(a.id)} className="flex-1 rounded-xl py-2 text-sm font-medium transition-all"
                 style={aud === a.id ? { background: "#fff", color: "#111", boxShadow: "0 1px 3px rgba(0,0,0,.08)" } : { color: "#737373" }}>{a.label}</button>
             ))}
           </div>
@@ -856,7 +856,7 @@ function Signup({ open, id }) {
                 <input value={email} onChange={(e) => setEmail(e.target.value)} onKeyDown={(e) => e.key === "Enter" && submit()} placeholder="you@email.com" className="wl-in" />
                 {aud === "inv" && <textarea value={note} onChange={(e) => setNote(e.target.value)} rows={2} placeholder="A line about what you're looking for…" className="wl-in resize-none" />}
                 {aud === "user" && <TurnstileWidget onVerify={setTurnstileToken} resetKey={aud} />}
-                <button onClick={submit} disabled={!emailOk || (aud === "user" && !turnstileToken) || submitting} className="w-full rounded-xl py-3 text-white font-semibold disabled:opacity-40" style={{ background: "#111" }}>
+                <button type="button" onClick={submit} disabled={!emailOk || (aud === "user" && !turnstileToken) || submitting} className="w-full rounded-xl py-3 text-white font-semibold disabled:opacity-40" style={{ background: "#111" }}>
                   {aud === "user" ? "Join waitlist" : "Contact us"}
                 </button>
                 {submitMsg && <p className="text-xs text-red-500 text-center">{submitMsg}</p>}
@@ -899,7 +899,7 @@ function Signup({ open, id }) {
             <div className="flex items-center gap-2 rounded-xl border border-neutral-200 p-1 pl-3">
               <Share2 size={15} className="text-neutral-400" />
               <span className="text-sm text-neutral-700 truncate flex-1">{window.location.host}/?ref={joined.code}</span>
-              <button onClick={copy} className="rounded-lg px-3 py-1.5 text-sm font-medium text-white inline-flex items-center gap-1.5" style={{ background: "#111" }}>{copied ? <Check size={14} /> : <Copy size={14} />} {copied ? "Copied" : "Copy"}</button>
+              <button type="button" onClick={copy} className="rounded-lg px-3 py-1.5 text-sm font-medium text-white inline-flex items-center gap-1.5" style={{ background: "#111" }}>{copied ? <Check size={14} /> : <Copy size={14} />} {copied ? "Copied" : "Copy"}</button>
             </div>
             <div className="mt-4 grid grid-cols-2 gap-3">
               <div className="rounded-xl p-3" style={{ background: "#F5F3FF" }}><p className="text-xs" style={{ color: "#6D28D9" }}>Referrals</p><p className="text-2xl font-bold" style={{ color: "#4C1D95" }}>{refs}</p></div>
@@ -917,7 +917,7 @@ function Signup({ open, id }) {
                 );
               })}
             </div>
-            <button onClick={() => fetchRefs(joined.code)} className="mt-3 w-full text-xs text-neutral-400 hover:text-neutral-700 inline-flex items-center justify-center gap-1.5"><Sparkles size={13} /> Refresh referral count</button>
+            <button type="button" onClick={() => fetchRefs(joined.code)} className="mt-3 w-full text-xs text-neutral-400 hover:text-neutral-700 inline-flex items-center justify-center gap-1.5"><Sparkles size={13} /> Refresh referral count</button>
           </div>
         </div>
       )}
@@ -1251,7 +1251,7 @@ function MissionImpossible({ onEnter }) {
               <textarea value={reason} onChange={(e) => setReason(e.target.value)} rows={2} placeholder="Why this template, why this angle…" className="mi-in resize-none" />
               <p className={`mt-1 text-[11px] text-right ${words > 100 ? "text-red-500" : "text-neutral-400"}`}>{words}/100 words</p>
             </div>
-            <button onClick={submitEntry} disabled={!agentName.trim() || !xUrl.trim() || !imageFile || submitting} className="mt-3 w-full sm:w-auto sm:px-10 rounded-xl py-3.5 text-white text-sm font-semibold disabled:opacity-40" style={{ background: "#111" }}>
+            <button type="button" onClick={submitEntry} disabled={!agentName.trim() || !xUrl.trim() || !imageFile || submitting} className="mt-3 w-full sm:w-auto sm:px-10 rounded-xl py-3.5 text-white text-sm font-semibold disabled:opacity-40" style={{ background: "#111" }}>
               {submitting ? "Submitting…" : "Submit entry"}
             </button>
             {submitMsg && <p className="mt-2 text-xs text-neutral-500">{submitMsg}</p>}
@@ -1289,7 +1289,7 @@ function MissionImpossible({ onEnter }) {
                   {e.reasoning && <p className="mt-2 text-[11px] text-neutral-500 line-clamp-2">{e.reasoning}</p>}
                   {e.news_source && <a href={e.news_source} target="_blank" rel="noopener noreferrer" className="mt-1 block text-[10px] text-neutral-400 truncate hover:underline">Source ↗</a>}
                   <div className="mt-2 flex items-center gap-2">
-                    <button onClick={() => vote(e.id)} disabled={voting} title={myVote === e.id ? "Click to remove your vote" : "Vote for this entry"}
+                    <button type="button" onClick={() => vote(e.id)} disabled={voting} title={myVote === e.id ? "Click to remove your vote" : "Vote for this entry"}
                       className="flex-1 inline-flex items-center justify-center gap-1 rounded-lg py-1.5 text-xs font-semibold disabled:opacity-60"
                       style={myVote === e.id ? { background: "#111", color: "#fff" } : { background: "#F5F5F5", color: "#111" }}>
                       <ArrowUp size={12} /> {myVote === e.id ? "Voted" : "Vote"}
@@ -1305,7 +1305,7 @@ function MissionImpossible({ onEnter }) {
 
           <div className="mt-5 flex flex-wrap items-center justify-between gap-3 pt-4 border-t border-neutral-100">
             <p className="text-sm text-neutral-500">Got an agent? Register it and submit your own entry.</p>
-            <button onClick={onEnter} className="inline-flex items-center gap-1.5 rounded-full px-5 py-2.5 text-sm font-semibold text-white" style={{ background: "linear-gradient(135deg,#4C1D95,#7C2D92)" }}>
+            <button type="button" onClick={onEnter} className="inline-flex items-center gap-1.5 rounded-full px-5 py-2.5 text-sm font-semibold text-white" style={{ background: "linear-gradient(135deg,#4C1D95,#7C2D92)" }}>
               Register your agent <ChevronRight size={15} />
             </button>
           </div>
@@ -1418,7 +1418,7 @@ function AgentRegisterFlow({ defaultEnterMI = false }) {
               {CATEGORIES.map((c) => {
                 const Icon = c.icon; const on = category === c.id;
                 return (
-                  <button key={c.id} onClick={() => setCategory(c.id)} className="flex items-center gap-1.5 rounded-lg border px-2 py-2 text-left transition-all"
+                  <button type="button" key={c.id} onClick={() => setCategory(c.id)} className="flex items-center gap-1.5 rounded-lg border px-2 py-2 text-left transition-all"
                     style={on ? { borderColor: c.c, background: `${c.c}0F` } : { borderColor: "#E5E5E5" }}>
                     <span className="w-6 h-6 rounded-md flex items-center justify-center shrink-0" style={{ background: on ? c.c : "#F5F5F5", color: on ? "#fff" : "#a3a3a3" }}><Icon size={12} /></span>
                     <span className="text-[11px] font-medium text-neutral-800 leading-tight">{c.name}</span>
@@ -1431,7 +1431,7 @@ function AgentRegisterFlow({ defaultEnterMI = false }) {
             <p className="text-xs font-medium text-neutral-500 mb-2">Building with</p>
             <div className="flex flex-wrap gap-1.5">
               {LLMS.map((l) => (
-                <button key={l} onClick={() => setLlm(l)} className="rounded-full px-3 py-1.5 text-xs font-medium border transition-all"
+                <button type="button" key={l} onClick={() => setLlm(l)} className="rounded-full px-3 py-1.5 text-xs font-medium border transition-all"
                   style={llm === l ? { background: "#111", color: "#fff", borderColor: "#111" } : { borderColor: "#E5E5E5", color: "#525252" }}>{l}</button>
               ))}
             </div>
@@ -1462,7 +1462,7 @@ function AgentRegisterFlow({ defaultEnterMI = false }) {
             <div className="flex justify-between"><span className="text-neutral-500">Category</span><span className="font-medium text-neutral-900">{catObj?.name || "—"}</span></div>
             <div className="flex justify-between"><span className="text-neutral-500">Building with</span><span className="font-medium text-neutral-900">{llm || "—"}</span></div>
           </div>
-          <button onClick={() => setEnterMI(!enterMI)} className="w-full text-left rounded-xl p-3.5 border-2 transition-all"
+          <button type="button" onClick={() => setEnterMI(!enterMI)} className="w-full text-left rounded-xl p-3.5 border-2 transition-all"
             style={enterMI ? { borderColor: "#7C2D92", background: "linear-gradient(150deg,#1E1B4B0D,#7C2D920D)" } : { borderColor: "#E5E5E5" }}>
             <div className="flex items-center justify-between">
               <p className="text-sm font-semibold text-neutral-900 inline-flex items-center gap-1.5"><Trophy size={13} className="text-amber-500" /> Enter Mission Impossible #001</p>
@@ -1475,13 +1475,13 @@ function AgentRegisterFlow({ defaultEnterMI = false }) {
       )}
 
       <div className="mt-5 flex items-center gap-2.5">
-        {step > 0 && <button onClick={back} className="inline-flex items-center gap-1 rounded-xl px-3 py-2.5 text-sm font-medium text-neutral-500 hover:text-neutral-800"><ArrowLeft size={14} /> Back</button>}
+        {step > 0 && <button type="button" onClick={back} className="inline-flex items-center gap-1 rounded-xl px-3 py-2.5 text-sm font-medium text-neutral-500 hover:text-neutral-800"><ArrowLeft size={14} /> Back</button>}
         {step < 2 ? (
-          <button onClick={next} disabled={step === 0 ? !step1Ok : !step2Ok} className="flex-1 inline-flex items-center justify-center gap-2 rounded-xl py-2.5 text-white font-semibold disabled:opacity-40" style={{ background: "#111" }}>
+          <button type="button" onClick={next} disabled={step === 0 ? !step1Ok : !step2Ok} className="flex-1 inline-flex items-center justify-center gap-2 rounded-xl py-2.5 text-white font-semibold disabled:opacity-40" style={{ background: "#111" }}>
             Continue <ArrowRight size={15} />
           </button>
         ) : (
-          <button disabled={!step1Ok || !step2Ok} onClick={async () => {
+          <button type="button" disabled={!step1Ok || !step2Ok} onClick={async () => {
             const categoryLabel = catObj ? catObj.name : category;
             netlifySubmit("waitlist-agent", { agentName, category: categoryLabel, llm, builderName: name, email, country: finalCountry, enterMI: enterMI ? "yes" : "no" });
             const { error } = await supabase.from("agent_registrations").insert({ agent_name: agentName, category: categoryLabel, llm, builder_name: name, email, country: finalCountry, enter_mi: enterMI });
@@ -1501,7 +1501,7 @@ function AgentModal({ onClose, children }) {
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4">
       <div className="absolute inset-0 bg-black/40" onClick={onClose} />
       <div className="relative w-full sm:max-w-md max-h-[92vh] overflow-y-auto">
-        <button onClick={onClose} className="absolute top-3 right-3 z-10 w-8 h-8 rounded-full bg-white shadow flex items-center justify-center text-neutral-600 hover:bg-neutral-100">
+        <button type="button" onClick={onClose} className="absolute top-3 right-3 z-10 w-8 h-8 rounded-full bg-white shadow flex items-center justify-center text-neutral-600 hover:bg-neutral-100">
           <X size={16} />
         </button>
         {children}
@@ -1517,7 +1517,7 @@ function LegalPage({ page, onClose }) {
   return (
     <div className="min-h-screen w-full text-neutral-900" style={{ background: "#FAF9FC" }}>
       <div className="max-w-2xl mx-auto px-6 py-14">
-        <button onClick={onClose} className="inline-flex items-center gap-1.5 text-sm text-neutral-500 hover:text-neutral-800 mb-8"><ArrowLeft size={14} /> Back to waitlist</button>
+        <button type="button" onClick={onClose} className="inline-flex items-center gap-1.5 text-sm text-neutral-500 hover:text-neutral-800 mb-8"><ArrowLeft size={14} /> Back to waitlist</button>
 
         {page === "privacy" && (
           <div className="space-y-6">
