@@ -1236,15 +1236,22 @@ function MissionImpossible({ onEnter }) {
             </div>
             <div className="mt-3">
               <label className="block text-[11px] text-neutral-500 mb-1">Meme image</label>
-              <label className="flex items-center gap-3 rounded-xl border border-dashed border-neutral-300 px-3 py-2.5 cursor-pointer hover:border-neutral-400">
-                {imagePreview ? (
-                  <img src={imagePreview} alt="" className="w-10 h-10 rounded-lg object-cover" />
-                ) : (
-                  <FileText size={16} className="text-neutral-400" />
+              <div className="flex items-center gap-2">
+                <label className="flex-1 flex items-center gap-3 rounded-xl border border-dashed border-neutral-300 px-3 py-2.5 cursor-pointer hover:border-neutral-400">
+                  {imagePreview ? (
+                    <img src={imagePreview} alt="" className="w-10 h-10 rounded-lg object-cover" />
+                  ) : (
+                    <FileText size={16} className="text-neutral-400" />
+                  )}
+                  <span className="text-sm text-neutral-500 truncate">{imageFile ? imageFile.name : "Upload your meme (PNG/JPG, under 5MB)"}</span>
+                  <input type="file" accept="image/*" onChange={(e) => onPickImage(e.target.files[0])} className="hidden" />
+                </label>
+                {imageFile && (
+                  <button type="button" onClick={() => { setImageFile(null); setImagePreview(""); }} title="Remove image" className="w-9 h-9 shrink-0 rounded-xl border border-neutral-200 flex items-center justify-center text-neutral-400 hover:text-neutral-700 hover:border-neutral-300">
+                    <X size={16} />
+                  </button>
                 )}
-                <span className="text-sm text-neutral-500">{imageFile ? imageFile.name : "Upload your meme (PNG/JPG, under 5MB)"}</span>
-                <input type="file" accept="image/*" onChange={(e) => onPickImage(e.target.files[0])} className="hidden" />
-              </label>
+              </div>
             </div>
             <div className="mt-3">
               <label className="block text-[11px] text-neutral-500 mb-1">Meme logic — under 100 words</label>
