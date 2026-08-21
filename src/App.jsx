@@ -963,11 +963,30 @@ function MIStars({ value }) {
   );
 }
 
+function StarRow({ label, avg, count, myValue, onRate }) {
+  return (
+    <div className="flex items-center justify-between mt-1">
+      <span className="text-[10px] text-neutral-400">{label}</span>
+      <div className="flex items-center gap-1">
+        {avg != null && <span className="text-[10px] text-neutral-400">{Number(avg).toFixed(1)} ({count})</span>}
+        <div className="flex">
+          {[1, 2, 3, 4, 5].map((n) => (
+            <button type="button" key={n} onClick={() => onRate(n)} title={`Rate ${n}`} className="p-0.5">
+              <Star size={11} fill={n <= (myValue || 0) ? "#F59E0B" : "none"} stroke={n <= (myValue || 0) ? "#F59E0B" : "#D4D4D4"} />
+            </button>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function MissionImpossible({ onEnter }) {
   const [entries, setEntries] = useState(MI_ENTRIES_SEED);
   const [loading, setLoading] = useState(true);
   const [myVote, setMyVote] = useState(null);
   const [voting, setVoting] = useState(false);
+  const [myRatings, setMyRatings] = useState({});
   const [agentName, setAgentName] = useState("");
   const [srcUrl, setSrcUrl] = useState("");
   const [xUrl, setXUrl] = useState("");
@@ -982,16 +1001,31 @@ function MissionImpossible({ onEnter }) {
     Promise.all([
       supabase.from("mi_entries").select("*").order("votes", { ascending: false }),
       supabase.from("mi_votes").select("entry_id").eq("voter_id", getVoterId()).maybeSingle(),
-    ]).then(([entriesRes, voteRes]) => {
+      supabase.from("mi_ratings").select("entry_id, funny, logic, accuracy").eq("voter_id", getVoterId()),
+    ]).then(([entriesRes, voteRes, ratingsRes]) => {
       if (cancelled) return;
       if (entriesRes.error) console.error("mi_entries fetch failed:", entriesRes.error.message);
       else setEntries(entriesRes.data || []);
       if (voteRes.error) console.error("mi_votes fetch failed:", voteRes.error.message);
       else if (voteRes.data) setMyVote(voteRes.data.entry_id);
+      if (ratingsRes.error) console.error("mi_ratings fetch failed:", ratingsRes.error.message);
+      else {
+        const byEntry = {};
+        (ratingsRes.data || []).forEach((r) => { byEntry[r.entry_id] = { funny: r.funny, logic: r.logic, accuracy: r.accuracy }; });
+        setMyRatings(byEntry);
+      }
       setLoading(false);
     });
     return () => { cancelled = true; };
   }, []);
+
+  const rate = async (entryId, category, value) => {
+    setMyRatings((r) => ({ ...r, [entryId]: { ...r[entryId], [category]: value } }));
+    const { error } = await supabase.rpc("rate_entry", { p_entry_id: entryId, p_voter_id: getVoterId(), p_category: category, p_value: value });
+    if (error) { console.error("rate_entry failed:", error.message); return; }
+    const { data } = await supabase.from("mi_entries").select("*").eq("id", entryId).single();
+    if (data) setEntries((es) => es.map((e) => (e.id === entryId ? data : e)));
+  };
 
   const onPickImage = (file) => {
     if (!file) return;
@@ -1302,6 +1336,11 @@ function MissionImpossible({ onEnter }) {
                       <ArrowUp size={12} /> {myVote === e.id ? "Voted" : "Vote"}
                     </button>
                     <span className="text-xs font-bold text-neutral-800 w-10 text-right">{e.votes}</span>
+                  </div>
+                  <div className="mt-2 pt-2 border-t border-neutral-100">
+                    <StarRow label="Funny" avg={e.funny_avg} count={e.funny_count} myValue={myRatings[e.id]?.funny} onRate={(v) => rate(e.id, "funny", v)} />
+                    <StarRow label="Logic relevant" avg={e.logic_avg} count={e.logic_count} myValue={myRatings[e.id]?.logic} onRate={(v) => rate(e.id, "logic", v)} />
+                    <StarRow label="Research accuracy" avg={e.accuracy_avg} count={e.accuracy_count} myValue={myRatings[e.id]?.accuracy} onRate={(v) => rate(e.id, "accuracy", v)} />
                   </div>
                 </div>
               </div>
