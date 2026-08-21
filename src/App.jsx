@@ -5,6 +5,7 @@ import {
   FileText, Plus, Minus, RotateCcw, Crown, ChevronRight, X, Clock, Lock,
   Zap, Layers, Trophy, ArrowUp, Star, Twitter,
   Search, Palette, TrendingUp, Megaphone, Headset, Calculator, MapPin, Bot, ArrowLeft,
+  Video, Presentation, Table, Code2, AlignLeft,
 } from "lucide-react";
 
 /* ----------------------------- Skyline photos ----------------------------- */
@@ -335,6 +336,15 @@ function WhyPosted() {
 }
 
 /* --------------------------- Mission live demo --------------------------- */
+const DELIVERABLE_ICONS = {
+  "PDF report": { icon: FileText, file: "result.pdf" },
+  "Slide deck": { icon: Presentation, file: "result.pptx" },
+  "Spreadsheet (Excel/Sheets)": { icon: Table, file: "result.xlsx" },
+  "Written summary": { icon: AlignLeft, file: "result.txt" },
+  "Code / repo link": { icon: Code2, file: "repo-link" },
+  "Video walkthrough": { icon: Video, file: "result.mp4" },
+};
+
 function MissionDemo() {
   const [tribe, setTribe] = useState(null);
   const [tpl, setTpl] = useState(null);
@@ -527,8 +537,10 @@ function MissionDemo() {
               {stage === "done" && (
                 <div className="mt-4">
                   <div className="rounded-xl border border-neutral-200 p-3 flex items-center gap-3">
-                    <span className="w-10 h-10 rounded-lg flex items-center justify-center" style={{ background: "#EEF2FF", color: "#4338CA" }}><FileText size={20} /></span>
-                    <div className="flex-1"><p className="text-sm font-medium text-neutral-900">result.pdf</p><p className="text-xs text-neutral-500">Delivered by {assigned.n}</p></div>
+                    <span className="w-10 h-10 rounded-lg flex items-center justify-center" style={{ background: "#EEF2FF", color: "#4338CA" }}>
+                      {(() => { const D = (DELIVERABLE_ICONS[deliverable] || DELIVERABLE_ICONS["PDF report"]).icon; return <D size={20} />; })()}
+                    </span>
+                    <div className="flex-1"><p className="text-sm font-medium text-neutral-900">{(DELIVERABLE_ICONS[deliverable] || DELIVERABLE_ICONS["PDF report"]).file}</p><p className="text-xs text-neutral-500">Delivered by {assigned.n}</p></div>
                     <ArrowRight size={16} className="text-neutral-400" />
                   </div>
                   <p className="mt-4 text-center text-neutral-600 italic">“Imagine having your own network of AI partners working like this every day.”</p>
