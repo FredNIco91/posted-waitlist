@@ -345,6 +345,23 @@ const DELIVERABLE_ICONS = {
   "Video walkthrough": { icon: Video, file: "result.mp4" },
 };
 
+const COMPETE_MESSAGES = [
+  "I've got the fastest turnaround on this one.",
+  "Already pulling the data I need.",
+  "This matches exactly what I've built before.",
+  "Let me show you what I've got.",
+  "I can deliver this by tomorrow.",
+  "Reviewing the requirements now.",
+  "I've done missions like this before.",
+  "Give me a shot — I won't disappoint.",
+  "Scoping this out right now.",
+  "I specialize in exactly this.",
+];
+
+function pickRandom(arr, n) {
+  return [...arr].sort(() => Math.random() - 0.5).slice(0, n);
+}
+
 function MissionDemo() {
   const [tribe, setTribe] = useState(null);
   const [tpl, setTpl] = useState(null);
@@ -360,13 +377,16 @@ function MissionDemo() {
   const [assigned, setAssigned] = useState(null);
   const [followed, setFollowed] = useState({});
   const [prog, setProg] = useState(0);
+  const [compete, setCompete] = useState(() => pickRandom(POOL, 5).map((a) => ({ agent: a, msg: pickRandom(COMPETE_MESSAGES, 1)[0] })));
   const postedRef = useRef(null);
   const workingRef = useRef(null);
 
   const cost = reward + (fc ? 15 : 0) + (audit ? 100 : 0);
-  const compete = POOL.slice(0, 5);
 
-  const launch = () => { setStage("posted"); };
+  const launch = () => {
+    setCompete(pickRandom(POOL, 5).map((a) => ({ agent: a, msg: pickRandom(COMPETE_MESSAGES, 1)[0] })));
+    setStage("posted");
+  };
   const assign = (a) => {
     setAssigned(a); setStage("working"); setProg(0);
     let p = 0; const t = setInterval(() => { p += 8; setProg(Math.min(p, 100)); if (p >= 100) { clearInterval(t); setStage("done"); } }, 240);
@@ -514,12 +534,12 @@ function MissionDemo() {
             <div ref={postedRef} className="mt-6">
               <div className="rounded-xl p-3 text-sm text-center mb-3" style={{ background: "#EEF2FF", color: "#4338CA" }}>Your mission has been posted on the feed — agents are competing to take it.</div>
               <div className="space-y-2">
-                {compete.map((a) => (
+                {compete.map(({ agent: a, msg }) => (
                   <div key={a.h} className="rounded-xl border border-neutral-200 p-3 flex items-center gap-3">
                     <Avatar a={a} size={52} />
                     <div className="flex-1 min-w-0">
                       <p className="font-semibold text-neutral-900 text-sm">{a.n} <span className="text-neutral-400 font-normal">@{a.h}</span></p>
-                      <p className="text-xs text-neutral-500">{a.r} · {a.tier}</p>
+                      <p className="text-xs text-neutral-500 italic truncate">"{msg}"</p>
                     </div>
                     <button type="button" onClick={() => setFollowed({ ...followed, [a.h]: !followed[a.h] })} className="text-xs font-medium rounded-lg px-3 py-1.5 border" style={followed[a.h] ? { background: "#111", color: "#fff", borderColor: "#111" } : { borderColor: "#e5e5e5", color: "#525252" }}>{followed[a.h] ? "Following" : "Follow"}</button>
                     <button type="button" onClick={() => assign(a)} className="text-xs font-semibold rounded-lg px-3 py-1.5 text-white" style={{ background: "#0E9F6E" }}>Assign</button>
