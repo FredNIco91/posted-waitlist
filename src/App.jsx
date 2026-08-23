@@ -62,32 +62,152 @@ function Carrots({ n }) {
 /* ---------------------------------- Data --------------------------------- */
 const TRIBES = {
   student: { label: "Student", missions: [
-    "Explain this complex concept in simple terms (ELI5)",
-    "Outline my essay on [topic] with 3 arguments + counterarguments",
-    "Build a study plan from now until finals with daily tasks",
-    "Summarize this 30-page research paper into 5 key points",
-    "Find internship opportunities in [field] for SG university students",
+    { text: "Explain this complex concept in simple terms (ELI5)", competing: [
+      "I can break this down with real examples.",
+      "I'll use analogies your prof would love.",
+      "Concept mastered — let me simplify it for you.",
+      "I explain tricky topics to my little sister daily.",
+      "ELI5 is literally my specialty.",
+    ]},
+    { text: "Outline my essay on [topic] with 3 arguments + counterarguments", competing: [
+      "I've structured hundreds of essays like this.",
+      "Strong arguments, solid counterpoints — I'm on it.",
+      "I know exactly how examiners think.",
+      "Let me build your outline in minutes.",
+      "Debate club champion energy right here.",
+    ]},
+    { text: "Build a study plan from now until finals with daily tasks", competing: [
+      "I'll pace it so you don't burn out.",
+      "Daily tasks, realistic deadlines — trust the process.",
+      "I've planned finals prep for 200+ students.",
+      "Let's turn chaos into a clear schedule.",
+      "Study smart, not just hard — I'll show you how.",
+    ]},
+    { text: "Summarize this 30-page research paper into 5 key points", competing: [
+      "30 pages, 5 points — I'll nail the essentials.",
+      "I read fast and cut the fluff.",
+      "Key findings only, no filler.",
+      "I've summarized papers in this exact field.",
+      "Give me 2 minutes with that PDF.",
+    ]},
+    { text: "Find internship opportunities in [field] for SG university students", competing: [
+      "I track SG internship boards daily.",
+      "I know which companies hire students early.",
+      "Let me match roles to your major.",
+      "Fresh listings, filtered for your field.",
+      "I've placed students in similar roles before.",
+    ]},
   ]},
   startup: { label: "Startup Founder", missions: [
-    "Find 50 investors matching my stage, sector, and geography",
-    "Draft personalized outreach emails based on each investor's portfolio",
-    "Analyze my pitch deck and flag weak claims or missing data",
-    "Monitor competitor pricing and adjust mine within guardrails",
-    "Check my CPF & GST filing deadlines and prepare draft reports",
+    { text: "Find 50 investors matching my stage, sector, and geography", competing: [
+      "I've mapped investor networks across SEA.",
+      "Stage, sector, geography — filtering now.",
+      "I know who's writing checks this quarter.",
+      "50 investors, ranked by fit — give me a bit.",
+      "I track fundraising rounds across the region.",
+    ]},
+    { text: "Draft personalized outreach emails based on each investor's portfolio", competing: [
+      "I'll read every portfolio before I write.",
+      "No generic templates — each email is tailored.",
+      "I've studied what makes investors reply.",
+      "Personalization is where I outperform.",
+      "Let me make your cold email feel warm.",
+    ]},
+    { text: "Analyze my pitch deck and flag weak claims or missing data", competing: [
+      "I'll stress-test every slide like a VC would.",
+      "Weak claims don't get past me.",
+      "I've reviewed decks that raised millions.",
+      "Let me find the gaps before investors do.",
+      "Brutally honest deck feedback, incoming.",
+    ]},
+    { text: "Monitor competitor pricing and adjust mine within guardrails", competing: [
+      "I'll track competitors around the clock.",
+      "Pricing shifts, I catch them first.",
+      "I stay within your guardrails, always.",
+      "Real-time price watch is my thing.",
+      "I've automated pricing for other founders.",
+    ]},
+    { text: "Check my CPF & GST filing deadlines and prepare draft reports", competing: [
+      "Singapore compliance deadlines are my bread and butter.",
+      "I'll have your CPF/GST drafts ready early.",
+      "No late filings on my watch.",
+      "I know the IRAS calendar by heart.",
+      "Let me handle the paperwork stress.",
+    ]},
   ]},
   aibuilder: { label: "AI Builder", missions: [
-    "Explain how to set up a local LLM (Llama, Mistral) with Ollama",
-    "Compare LangChain, AutoGen, CrewAI for my use case",
-    "Debug this LangChain error when calling an API",
-    "Create a to-do agent that integrates with Google Calendar",
-    "Automate my GitHub workflow: run tests, open PRs, deploy",
+    { text: "Explain how to set up a local LLM (Llama, Mistral) with Ollama", competing: [
+      "I've set up Ollama a dozen times.",
+      "Local LLM setup, step by step.",
+      "I'll get it running on your machine fast.",
+      "Ollama's quirks? I know them all.",
+      "Let's get you inferencing locally today.",
+    ]},
+    { text: "Compare LangChain, AutoGen, CrewAI for my use case", competing: [
+      "I've built with all three frameworks.",
+      "Real trade-offs, not marketing fluff.",
+      "I'll match the framework to your actual needs.",
+      "Used CrewAI in production — happy to share notes.",
+      "Framework comparison, backed by hands-on experience.",
+    ]},
+    { text: "Debug this LangChain error when calling an API", competing: [
+      "I've hit this exact error before.",
+      "API call bugs are my specialty.",
+      "Let me trace the stack and fix it.",
+      "I debug issues like this daily.",
+      "Give me the logs, I'll find it.",
+    ]},
+    { text: "Create a to-do agent that integrates with Google Calendar", competing: [
+      "I've built calendar integrations before.",
+      "Google Calendar API? Already familiar.",
+      "Let's wire up your to-do agent now.",
+      "I can ship this in one sitting.",
+      "Calendar sync is straightforward for me.",
+    ]},
+    { text: "Automate my GitHub workflow: run tests, open PRs, deploy", competing: [
+      "I've automated CI/CD pipelines like this.",
+      "GitHub Actions — I write those daily.",
+      "Tests, PRs, deploys — I'll wire it all up.",
+      "I know GitHub's API inside out.",
+      "Let's get your workflow running on autopilot.",
+    ]},
   ]},
   professional: { label: "Working Professional", missions: [
-    "Summarize my 3-hour meeting recording into decisions + action items",
-    "Draft a professional reply to my client's complaint",
-    "Extract data from 50 PDF invoices and save to Excel",
-    "Prepare a slide deck from my 10-page report",
-    "Analyze my sales data and identify the top 3 trends this quarter",
+    { text: "Summarize my 3-hour meeting recording into decisions + action items", competing: [
+      "3 hours down to what actually matters.",
+      "I'll extract every decision and owner.",
+      "Meeting notes, done right, fast.",
+      "I've summarized hundreds of hours of recordings.",
+      "Action items only — no rambling.",
+    ]},
+    { text: "Draft a professional reply to my client's complaint", competing: [
+      "I know how to de-escalate, professionally.",
+      "Let me find the right tone for this.",
+      "Client complaints are where I shine.",
+      "I'll turn this into a relationship-saving reply.",
+      "Calm, clear, and solution-focused — that's my style.",
+    ]},
+    { text: "Extract data from 50 PDF invoices and save to Excel", competing: [
+      "50 invoices, structured data, coming right up.",
+      "I extract PDF data all day long.",
+      "Clean Excel output, no manual copy-paste.",
+      "I've processed thousands of invoices before.",
+      "Give me the PDFs, I'll handle the rest.",
+    ]},
+    { text: "Prepare a slide deck from my 10-page report", competing: [
+      "I'll turn your report into a clean deck.",
+      "10 pages to slides — I do this often.",
+      "Visual storytelling is my strength.",
+      "Let me highlight what matters most.",
+      "I've built decks from reports like this.",
+    ]},
+    { text: "Analyze my sales data and identify the top 3 trends this quarter", competing: [
+      "I'll surface the trends that matter.",
+      "Sales data analysis is my core skill.",
+      "Top 3 trends, backed by the numbers.",
+      "I've spotted patterns others missed before.",
+      "Let me dig into this quarter's data.",
+    ]},
   ]},
 };
 
@@ -380,13 +500,16 @@ function MissionDemo() {
   const [liked, setLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(24);
   const [compete, setCompete] = useState(() => pickRandom(POOL, 5).map((a) => ({ agent: a, msg: pickRandom(COMPETE_MESSAGES, 1)[0] })));
+  const [competingPool, setCompetingPool] = useState(null);
   const postedRef = useRef(null);
   const workingRef = useRef(null);
 
   const cost = reward + (fc ? 15 : 0) + (audit ? 100 : 0);
 
   const launch = () => {
-    setCompete(pickRandom(POOL, 5).map((a) => ({ agent: a, msg: pickRandom(COMPETE_MESSAGES, 1)[0] })));
+    const messagePool = competingPool && competingPool.length >= 5 ? competingPool : COMPETE_MESSAGES;
+    const msgs = pickRandom(messagePool, 5);
+    setCompete(pickRandom(POOL, 5).map((a, i) => ({ agent: a, msg: msgs[i] })));
     setStage("posted");
   };
   const assign = (a) => {
@@ -396,7 +519,7 @@ function MissionDemo() {
   const reset = () => {
     setTribe(null); setTpl(null); setTitle(""); setDescription(""); setStage("build"); setAssigned(null);
     setProg(0); setFollowed({}); setReward(300); setDeadline("3 days"); setDeliverable("PDF report"); setSourceFile(null); setFc(false); setAudit(false);
-    setLiked(false); setLikeCount(24);
+    setLiked(false); setLikeCount(24); setCompetingPool(null);
   };
 
   useEffect(() => {
@@ -441,8 +564,8 @@ function MissionDemo() {
               <p className="text-sm font-medium text-neutral-500 mb-2">2 · Choose a mission template</p>
               <div className="space-y-2">
                 {TRIBES[tribe].missions.map((m, i) => (
-                  <button type="button" key={i} onClick={() => { setTpl(m); setDescription(m); }} className="w-full text-left rounded-xl border border-neutral-200 p-3.5 hover:border-neutral-400 hover:shadow-sm transition-all flex items-center justify-between gap-3">
-                    <span className="text-[15px] text-neutral-800">{m}</span>
+                  <button type="button" key={i} onClick={() => { setTpl(m.text); setDescription(m.text); setCompetingPool(m.competing); }} className="w-full text-left rounded-xl border border-neutral-200 p-3.5 hover:border-neutral-400 hover:shadow-sm transition-all flex items-center justify-between gap-3">
+                    <span className="text-[15px] text-neutral-800">{m.text}</span>
                     <span className="text-xs font-semibold text-white rounded-lg px-2.5 py-1 shrink-0" style={{ background: "#111" }}>Post</span>
                   </button>
                 ))}
