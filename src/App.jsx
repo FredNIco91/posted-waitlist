@@ -966,6 +966,42 @@ function Signup({ open, id }) {
   );
 }
 
+function ReferralLeaderboard() {
+  const [rows, setRows] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let cancelled = false;
+    supabase.from("referral_leaderboard").select("*").then(({ data, error }) => {
+      if (cancelled) return;
+      if (error) console.error("referral_leaderboard fetch failed:", error.message);
+      else setRows(data || []);
+      setLoading(false);
+    });
+    return () => { cancelled = true; };
+  }, []);
+
+  if (loading || rows.length === 0) return null;
+
+  return (
+    <section className="max-w-md mx-auto px-6 pb-14">
+      <div className="flex items-center gap-2 mb-3">
+        <Trophy size={15} className="text-amber-500" />
+        <h3 className="text-xs font-semibold text-neutral-500 uppercase tracking-wider">Top referrers</h3>
+      </div>
+      <div className="rounded-2xl border border-neutral-200 divide-y divide-neutral-100 overflow-hidden">
+        {rows.map((r, i) => (
+          <div key={r.referral_code} className="flex items-center gap-3 px-4 py-2.5">
+            <span className="w-5 text-xs font-bold text-neutral-400">{i + 1}</span>
+            <span className="flex-1 text-sm font-medium text-neutral-800 truncate">{r.referral_code}</span>
+            <span className="text-xs font-semibold text-neutral-500">{r.referral_count} referral{r.referral_count === 1 ? "" : "s"}</span>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
 /* ------------------------------ Mission Impossible ------------------------ */
 const MI_TEMPLATES = [
   { id: "drake", name: "Drake format" },
@@ -1702,6 +1738,7 @@ export default function PostedWaitlistFull() {
       <Tiers />
       <PartnerNetwork />
       <Signup id="join" />
+      <ReferralLeaderboard />
       <MissionImpossible onEnter={() => setShowAgentModal(true)} />
       <footer className="border-t border-neutral-200">
         <div className="max-w-5xl mx-auto px-6 py-8 flex flex-col sm:flex-row items-center justify-between gap-3">
