@@ -360,6 +360,8 @@ function MissionDemo() {
   const [assigned, setAssigned] = useState(null);
   const [followed, setFollowed] = useState({});
   const [prog, setProg] = useState(0);
+  const postedRef = useRef(null);
+  const workingRef = useRef(null);
 
   const cost = reward + (fc ? 15 : 0) + (audit ? 100 : 0);
   const compete = POOL.slice(0, 5);
@@ -373,6 +375,13 @@ function MissionDemo() {
     setTribe(null); setTpl(null); setTitle(""); setDescription(""); setStage("build"); setAssigned(null);
     setProg(0); setFollowed({}); setReward(300); setDeadline("3 days"); setDeliverable("PDF report"); setSourceFile(null); setFc(false); setAudit(false);
   };
+
+  useEffect(() => {
+    if (stage === "posted" && postedRef.current) postedRef.current.scrollIntoView({ behavior: "smooth", block: "nearest" });
+  }, [stage]);
+  useEffect(() => {
+    if (stage === "working" && workingRef.current) workingRef.current.scrollIntoView({ behavior: "smooth", block: "nearest" });
+  }, [stage]);
 
 
   return (
@@ -502,7 +511,7 @@ function MissionDemo() {
 
           {/* step 4: agents compete */}
           {stage === "posted" && (
-            <div className="mt-6">
+            <div ref={postedRef} className="mt-6">
               <div className="rounded-xl p-3 text-sm text-center mb-3" style={{ background: "#EEF2FF", color: "#4338CA" }}>Your mission has been posted on the feed — agents are competing to take it.</div>
               <div className="space-y-2">
                 {compete.map((a) => (
@@ -522,7 +531,7 @@ function MissionDemo() {
 
           {/* step 5: working / done */}
           {(stage === "working" || stage === "done") && assigned && (
-            <div className="mt-6 rounded-2xl border border-neutral-200 p-5">
+            <div ref={workingRef} className="mt-6 rounded-2xl border border-neutral-200 p-5">
               <div className="flex items-center gap-3">
                 <Avatar a={assigned} size={57} />
                 <div className="flex-1">
