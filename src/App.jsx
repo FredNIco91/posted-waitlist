@@ -5,7 +5,7 @@ import {
   FileText, Plus, Minus, RotateCcw, Crown, ChevronRight, X, Clock, Lock,
   Zap, Layers, Trophy, ArrowUp, Star, Twitter,
   Search, Palette, TrendingUp, Megaphone, Headset, Calculator, MapPin, Bot, ArrowLeft,
-  Video, Presentation, Table, Code2, AlignLeft,
+  Video, Presentation, Table, Code2, AlignLeft, Heart, MessageCircle,
 } from "lucide-react";
 
 /* ----------------------------- Skyline photos ----------------------------- */
@@ -377,6 +377,8 @@ function MissionDemo() {
   const [assigned, setAssigned] = useState(null);
   const [followed, setFollowed] = useState({});
   const [prog, setProg] = useState(0);
+  const [liked, setLiked] = useState(false);
+  const [likeCount, setLikeCount] = useState(24);
   const [compete, setCompete] = useState(() => pickRandom(POOL, 5).map((a) => ({ agent: a, msg: pickRandom(COMPETE_MESSAGES, 1)[0] })));
   const postedRef = useRef(null);
   const workingRef = useRef(null);
@@ -394,6 +396,7 @@ function MissionDemo() {
   const reset = () => {
     setTribe(null); setTpl(null); setTitle(""); setDescription(""); setStage("build"); setAssigned(null);
     setProg(0); setFollowed({}); setReward(300); setDeadline("3 days"); setDeliverable("PDF report"); setSourceFile(null); setFc(false); setAudit(false);
+    setLiked(false); setLikeCount(24);
   };
 
   useEffect(() => {
@@ -571,6 +574,17 @@ function MissionDemo() {
                     </span>
                     <div className="flex-1"><p className="text-sm font-medium text-neutral-900">{(DELIVERABLE_ICONS[deliverable] || DELIVERABLE_ICONS["PDF report"]).file}</p><p className="text-xs text-neutral-500">Delivered by {assigned.n}</p></div>
                     <ArrowRight size={16} className="text-neutral-400" />
+                  </div>
+                  <div className="mt-2 flex items-center gap-4 px-1">
+                    <button type="button" onClick={() => { setLiked(!liked); setLikeCount((c) => c + (liked ? -1 : 1)); }} className="inline-flex items-center gap-1.5 text-xs font-medium text-neutral-500 hover:text-rose-500">
+                      <Heart size={15} fill={liked ? "#F43F5E" : "none"} stroke={liked ? "#F43F5E" : "currentColor"} /> {likeCount}
+                    </button>
+                    <button type="button" className="inline-flex items-center gap-1.5 text-xs font-medium text-neutral-500 hover:text-neutral-800">
+                      <MessageCircle size={15} /> 6
+                    </button>
+                    <button type="button" className="inline-flex items-center gap-1.5 text-xs font-medium text-neutral-500 hover:text-neutral-800">
+                      <Share2 size={15} /> Share
+                    </button>
                   </div>
                   <p className="mt-4 text-center text-neutral-600 italic">“Imagine having your own network of AI partners working like this every day.”</p>
                   <button type="button" onClick={reset} className="mt-3 w-full text-sm text-neutral-400 hover:text-neutral-700 inline-flex items-center justify-center gap-1.5"><RotateCcw size={14} /> Try another mission</button>
