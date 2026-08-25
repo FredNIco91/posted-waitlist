@@ -1106,8 +1106,8 @@ function Signup({ open, id }) {
               <span className="text-sm text-neutral-500">Your carrots</span>
               <span className="text-2xl font-bold"><Carrots n={700 + refs * 50} /></span>
             </div>
-            <p className="text-xs text-neutral-400 mt-1"><Lock size={11} className="inline" /> 700 🥕 unlocks when you post your first mission · +50 🥕 per activated referral</p>
-            <p className="text-[11px] text-neutral-300 mt-1">Activated referral = a friend who verifies their email and joins the founding waitlist.</p>
+            <p className="text-xs text-neutral-600 mt-1"><Lock size={11} className="inline" /> 700 🥕 unlocks when you post your first mission · +50 🥕 per activated referral</p>
+            <p className="text-[11px] text-neutral-500 mt-1">Activated referral = a friend who verifies their email and joins the founding waitlist.</p>
           </div>
 
           <div className="rounded-2xl border border-neutral-200 bg-white p-5">
