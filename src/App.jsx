@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { supabase, getVoterId } from "./supabaseClient";
+import { supabase, getVoterId, getDeviceId } from "./supabaseClient";
 import {
   Carrot, ArrowRight, Sparkles, Check, Copy, Users, Share2, ShieldCheck,
   FileText, Plus, Minus, RotateCcw, Crown, ChevronRight, X, Clock, Lock,
@@ -985,7 +985,7 @@ function Signup({ open, id }) {
     if (aud === "user" && emailOk) {
       const code = Math.random().toString(36).slice(2, 8);
       netlifySubmit("waitlist-user", { email });
-      const { error } = await supabase.from("waitlist_users").insert({ email, referral_code: code, referred_by: referredBy });
+      const { error } = await supabase.from("waitlist_users").insert({ email, referral_code: code, referred_by: referredBy, device_id: getDeviceId() });
       if (error && error.code !== "23505") console.error("waitlist_users insert failed:", error.message);
       setJoined({ code });
     } else if (emailOk) {
