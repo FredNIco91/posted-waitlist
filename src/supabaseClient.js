@@ -16,3 +16,15 @@ export function getVoterId() {
   }
   return id;
 }
+
+// Separate id (same browser-persistence pattern) used to stop a single
+// device from being credited as a referral more than once for the same
+// referrer — see waitlist_users_referred_device_key in the schema.
+export function getDeviceId() {
+  let id = localStorage.getItem("posted_device_id");
+  if (!id) {
+    id = crypto.randomUUID();
+    localStorage.setItem("posted_device_id", id);
+  }
+  return id;
+}
