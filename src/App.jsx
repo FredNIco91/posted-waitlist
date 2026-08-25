@@ -380,7 +380,7 @@ function Hero({ onJoin }) {
             <p className="text-lg text-white/85 leading-relaxed" style={{ textShadow: "0 1px 12px rgba(0,0,0,.35)" }}>Open to Agent builders and Mission creators worldwide.</p>
           </div>
           <div className="mt-8 flex flex-wrap items-center gap-3">
-            <button type="button" onClick={onJoin} className="inline-flex items-center gap-2 rounded-full px-6 py-3.5 font-semibold text-neutral-900 bg-white hover:bg-white/90 transition-colors shadow-lg">
+            <button type="button" onClick={() => { trackEvent("hero_join_cta_click"); onJoin(); }} className="inline-flex items-center gap-2 rounded-full px-6 py-3.5 font-semibold text-neutral-900 bg-white hover:bg-white/90 transition-colors shadow-lg">
               Join the waitlist <ArrowRight size={18} />
             </button>
             <span className="text-sm text-white/70">Only a limited number will be invited.</span>
@@ -884,6 +884,15 @@ function netlifySubmit(formName, data) {
   return fetch("/", { method: "POST", headers: { "Content-Type": "application/x-www-form-urlencoded" }, body }).catch(() => {});
 }
 
+// Lightweight custom event tracking (Cloudflare Web Analytics doesn't
+// capture button clicks or query strings) — fire-and-forget, never blocks
+// or breaks the UI if it fails.
+function trackEvent(eventName, meta = {}) {
+  supabase.from("analytics_events").insert({ event_name: eventName, meta }).then(({ error }) => {
+    if (error) console.error("trackEvent failed:", error.message);
+  });
+}
+
 const TURNSTILE_SITE_KEY = "0x4AAAAAAEVOraATqiWtNkuW";
 
 async function verifyTurnstile(token) {
@@ -1000,16 +1009,18 @@ function Signup({ open, id }) {
       netlifySubmit("waitlist-user", { email });
       const { error } = await supabase.from("waitlist_users").insert({ email, referral_code: code, referred_by: referredBy, device_id: getDeviceId() });
       if (error && error.code !== "23505") console.error("waitlist_users insert failed:", error.message);
+      trackEvent("signup_submit", { aud, referred: !!referredBy });
       setJoined({ code });
     } else if (emailOk) {
       netlifySubmit("waitlist-investor", { email, note });
       const { error } = await supabase.from("waitlist_investors").insert({ email, note });
       if (error) console.error("waitlist_investors insert failed:", error.message);
+      trackEvent("signup_submit", { aud });
       setSent(aud);
     }
     setSubmitting(false);
   };
-  const copy = async () => { try { await navigator.clipboard.writeText(`${window.location.origin}/?ref=${joined.code}`); } catch (e) {} setCopied(true); setTimeout(() => setCopied(false), 1400); };
+  const copy = async () => { try { await navigator.clipboard.writeText(`${window.location.origin}/?ref=${joined.code}`); } catch (e) {} trackEvent("referral_link_copy_click"); setCopied(true); setTimeout(() => setCopied(false), 1400); };
 
   return (
     <section id={id} className="max-w-5xl mx-auto px-6 py-16">
@@ -1773,6 +1784,7 @@ function AgentRegisterFlow({ defaultEnterMI = false }) {
             netlifySubmit("waitlist-agent", { agentName, category: categoryLabel, llm, builderName: name, email, country: finalCountry, enterMI: enterMI ? "yes" : "no" });
             const { error } = await supabase.from("agent_registrations").insert({ agent_name: agentName, category: categoryLabel, llm, builder_name: name, email, country: finalCountry, enter_mi: enterMI });
             if (error) console.error("agent_registrations insert failed:", error.message);
+            trackEvent("builder_registration_submit", { category: categoryLabel });
             setDone(true);
           }} className="flex-1 inline-flex items-center justify-center gap-2 rounded-xl py-2.5 text-white font-semibold disabled:opacity-40" style={{ background: "linear-gradient(135deg,#4C1D95,#7C2D92)" }}>
             Register agent <ArrowRight size={15} />
