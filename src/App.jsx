@@ -1072,19 +1072,21 @@ function Signup({ open, id }) {
         </div>
       )}
 
-      <div className="max-w-md mx-auto mt-4">
-        <details className="text-center">
-          <summary className="text-xs text-neutral-400 hover:text-neutral-600 cursor-pointer select-none">Already joined? Check your referral count</summary>
-          <div className="mt-3 flex items-center gap-2">
-            <input value={checkEmail} onChange={(e) => setCheckEmail(e.target.value)} onKeyDown={(e) => e.key === "Enter" && checkStatus()} placeholder="you@email.com" className="wl-in flex-1" />
-            <button type="button" onClick={checkStatus} disabled={!checkEmail.trim() || checking} className="rounded-xl px-4 py-2.5 text-sm font-semibold text-white disabled:opacity-40" style={{ background: "#111" }}>{checking ? "…" : "Check"}</button>
-          </div>
-          {checkResult === "not_found" && <p className="mt-2 text-xs text-neutral-400">No waitlist entry found for that email.</p>}
-          {checkResult && checkResult !== "not_found" && (
-            <p className="mt-2 text-xs text-neutral-500">You've earned <Carrots n={700 + checkResult.referral_count * 50} /> — {checkResult.referral_count} activated referral{checkResult.referral_count === 1 ? "" : "s"} so far.</p>
-          )}
-        </details>
-      </div>
+      {!joined && (
+        <div className="max-w-md mx-auto mt-4">
+          <details className="text-center">
+            <summary className="text-xs text-neutral-400 hover:text-neutral-600 cursor-pointer select-none">Already joined? Check your referral count</summary>
+            <div className="mt-3 flex items-center gap-2">
+              <input value={checkEmail} onChange={(e) => setCheckEmail(e.target.value)} onKeyDown={(e) => e.key === "Enter" && checkStatus()} placeholder="you@email.com" className="wl-in flex-1" />
+              <button type="button" onClick={checkStatus} disabled={!checkEmail.trim() || checking} className="rounded-xl px-4 py-2.5 text-sm font-semibold text-white disabled:opacity-40" style={{ background: "#111" }}>{checking ? "…" : "Check"}</button>
+            </div>
+            {checkResult === "not_found" && <p className="mt-2 text-xs text-neutral-400">No waitlist entry found for that email.</p>}
+            {checkResult && checkResult !== "not_found" && (
+              <p className="mt-2 text-xs text-neutral-500">You've earned <Carrots n={700 + checkResult.referral_count * 50} /> — {checkResult.referral_count} activated referral{checkResult.referral_count === 1 ? "" : "s"} so far.</p>
+            )}
+          </details>
+        </div>
+      )}
 
       {sent && (
         <div className="max-w-md mx-auto rounded-2xl border border-neutral-200 bg-white p-6 text-center">
@@ -1106,8 +1108,8 @@ function Signup({ open, id }) {
               <span className="text-sm text-neutral-500">Your carrots</span>
               <span className="text-2xl font-bold"><Carrots n={700 + refs * 50} /></span>
             </div>
-            <p className="text-xs text-neutral-600 mt-1"><Lock size={11} className="inline" /> 700 🥕 unlocks when you post your first mission · +50 🥕 per activated referral</p>
-            <p className="text-[11px] text-neutral-500 mt-1">Activated referral = a friend who verifies their email and joins the founding waitlist.</p>
+            <p className="text-xs text-neutral-800 font-medium mt-1"><Lock size={11} className="inline" /> 700 🥕 unlocks when you post your first mission · +50 🥕 per activated referral</p>
+            <p className="text-[11px] text-neutral-600 mt-1">Activated referral = a friend who verifies their email and joins the founding waitlist.</p>
           </div>
 
           <div className="rounded-2xl border border-neutral-200 bg-white p-5">
