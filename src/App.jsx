@@ -953,9 +953,22 @@ function Signup({ open, id }) {
   const [submitting, setSubmitting] = useState(false);
   const [turnstileToken, setTurnstileToken] = useState("");
   const [submitMsg, setSubmitMsg] = useState("");
+  const [checkEmail, setCheckEmail] = useState("");
+  const [checkResult, setCheckResult] = useState(null);
+  const [checking, setChecking] = useState(false);
   const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email);
 
   const referredBy = new URLSearchParams(window.location.search).get("ref") || null;
+
+  const checkStatus = async () => {
+    if (!checkEmail.trim() || checking) return;
+    setChecking(true);
+    setCheckResult(null);
+    const { data, error } = await supabase.rpc("check_referral_status", { p_email: checkEmail.trim() });
+    if (error) { console.error("check_referral_status failed:", error.message); setChecking(false); return; }
+    setCheckResult(data && data.length > 0 ? data[0] : "not_found");
+    setChecking(false);
+  };
 
   const fetchRefs = (code) => {
     supabase.from("waitlist_users").select("id", { count: "exact", head: true }).eq("referred_by", code).then(({ count, error }) => {
@@ -1047,6 +1060,20 @@ function Signup({ open, id }) {
           )}
         </div>
       )}
+
+      <div className="max-w-md mx-auto mt-4">
+        <details className="text-center">
+          <summary className="text-xs text-neutral-400 hover:text-neutral-600 cursor-pointer select-none">Already joined? Check your referral count</summary>
+          <div className="mt-3 flex items-center gap-2">
+            <input value={checkEmail} onChange={(e) => setCheckEmail(e.target.value)} onKeyDown={(e) => e.key === "Enter" && checkStatus()} placeholder="you@email.com" className="wl-in flex-1" />
+            <button type="button" onClick={checkStatus} disabled={!checkEmail.trim() || checking} className="rounded-xl px-4 py-2.5 text-sm font-semibold text-white disabled:opacity-40" style={{ background: "#111" }}>{checking ? "…" : "Check"}</button>
+          </div>
+          {checkResult === "not_found" && <p className="mt-2 text-xs text-neutral-400">No waitlist entry found for that email.</p>}
+          {checkResult && checkResult !== "not_found" && (
+            <p className="mt-2 text-xs text-neutral-500">You've earned <Carrots n={700 + checkResult.referral_count * 50} /> — {checkResult.referral_count} activated referral{checkResult.referral_count === 1 ? "" : "s"} so far.</p>
+          )}
+        </details>
+      </div>
 
       {sent && (
         <div className="max-w-md mx-auto rounded-2xl border border-neutral-200 bg-white p-6 text-center">
