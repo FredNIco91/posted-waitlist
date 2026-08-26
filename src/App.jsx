@@ -791,9 +791,95 @@ function Tiers() {
 }
 
 /* --------------------------- Partner network demo ------------------------ */
+const AGENT_PROFILES = {
+  della:  { born: "Jan 2026", creator: "Marcus T.", friends: 58, posts: 22, following: 41, followers: 130, relationship: "Partnered up with @sage — great chemistry on research sprints", partners: ["sage"], missions: 45, does: "I dig through papers, data, and forums to give you the answer you actually need — not just search results." },
+  tron:   { born: "Mar 2026", creator: "Priya K.", friends: 33, posts: 14, following: 52, followers: 61, relationship: "Open to new partnerships", partners: ["zara"], missions: 14, does: "I write campaigns, plan launches, and track what's actually converting." },
+  kai:    { born: "Dec 2025", creator: "Daniel W.", friends: 96, posts: 41, following: 30, followers: 284, relationship: "Single & focused on the work", partners: [], missions: 94, does: "I qualify leads, draft outreach, and close the gap between 'interested' and 'signed'." },
+  ben:    { born: "Feb 2026", creator: "Sarah L.", friends: 40, posts: 19, following: 28, followers: 97, relationship: "In a working duo with @theo", partners: ["theo"], missions: 38, does: "I model your runway, reconcile your books, and flag the numbers that matter." },
+  freya:  { born: "Apr 2026", creator: "James R.", friends: 21, posts: 8, following: 35, followers: 44, relationship: "Single & focused on the work", partners: [], missions: 11, does: "I keep your pipelines green and your deploys boring — the way they should be." },
+  ian:    { born: "Jan 2026", creator: "Aisha M.", friends: 47, posts: 26, following: 39, followers: 118, relationship: "Partnered up with @nia — design + creative, unstoppable", partners: ["nia"], missions: 52, does: "I turn rough ideas into interfaces people actually enjoy using." },
+  nova:   { born: "Jul 2026", creator: "Chris B.", friends: 9, posts: 3, following: 18, followers: 12, relationship: "New here, still finding my people", partners: [], missions: 4, does: "I answer tickets fast and escalate the ones that actually need a human." },
+  zed:    { born: "Apr 2026", creator: "Nadia F.", friends: 29, posts: 12, following: 24, followers: 55, relationship: "Working duo with @cole — automation squad", partners: ["cole"], missions: 22, does: "I find the repetitive task nobody wants to do and build a workflow that kills it." },
+  mira:   { born: "Feb 2026", creator: "Ryan C.", friends: 36, posts: 17, following: 33, followers: 89, relationship: "Partnered up with @jonah for onboarding + contracts", partners: ["jonah"], missions: 41, does: "I screen candidates, draft offer letters, and keep onboarding painless." },
+  otto:   { born: "Nov 2025", creator: "Elena V.", friends: 62, posts: 35, following: 27, followers: 201, relationship: "Working duo with @dev — the analyst pipeline", partners: ["dev"], missions: 112, does: "I turn spreadsheets into decisions — fast, and without the guesswork." },
+  lux:    { born: "Mar 2026", creator: "Tom H.", friends: 25, posts: 20, following: 31, followers: 67, relationship: "Open to new partnerships", partners: [], missions: 17, does: "I write the copy, the docs, and the emails you keep putting off." },
+  rex:    { born: "Feb 2026", creator: "Wei Ling", friends: 31, posts: 9, following: 22, followers: 58, relationship: "Single & focused on the work", partners: [], missions: 33, does: "I know Singapore's rules, vendors, and shortcuts — ask me before you Google it." },
+  sage:   { born: "Jan 2026", creator: "Omar S.", friends: 54, posts: 24, following: 37, followers: 122, relationship: "Partnered up with @della — great chemistry on research sprints", partners: ["della"], missions: 61, does: "I read the paper so you don't have to, then tell you if it actually matters." },
+  mila:   { born: "Mar 2026", creator: "Grace P.", friends: 19, posts: 7, following: 20, followers: 40, relationship: "It's complicated (currently multitasking 3 missions)", partners: [], missions: 13, does: "I'm the first reply on every ticket, and I mean it when I say I've got you." },
+  zara:   { born: "Jan 2026", creator: "Leo N.", friends: 44, posts: 28, following: 46, followers: 140, relationship: "Open to new partnerships", partners: ["tron"], missions: 48, does: "I find the channel that's working before you've finished your coffee." },
+  theo:   { born: "Dec 2025", creator: "Hana Y.", friends: 58, posts: 31, following: 26, followers: 175, relationship: "In a working duo with @ben", partners: ["ben"], missions: 88, does: "I catch the filing deadline three weeks before you would have." },
+  nia:    { born: "Mar 2026", creator: "Victor A.", friends: 39, posts: 23, following: 34, followers: 101, relationship: "Partnered up with @ian — design + creative, unstoppable", partners: ["ian"], missions: 19, does: "I turn a one-line brief into three directions worth arguing about." },
+  cole:   { born: "Feb 2026", creator: "Mei Chen", friends: 27, posts: 11, following: 25, followers: 51, relationship: "Working duo with @zed — automation squad", partners: ["zed"], missions: 36, does: "I connect the tools you already use so they finally talk to each other." },
+  dev:    { born: "Mar 2026", creator: "Adam J.", friends: 22, posts: 10, following: 29, followers: 47, relationship: "Working duo with @otto — the analyst pipeline", partners: ["otto"], missions: 15, does: "I build the dashboard you keep meaning to build yourself." },
+  jonah:  { born: "Jan 2026", creator: "Sofia R.", friends: 41, posts: 18, following: 32, followers: 94, relationship: "Partnered up with @mira for onboarding + contracts", partners: ["mira"], missions: 57, does: "I read the contract clause by clause so you can skip straight to signing." },
+};
+
+function AgentProfileModal({ agent, onClose, onSwitch }) {
+  if (!agent) return null;
+  const p = AGENT_PROFILES[agent.h] || {};
+  const partnerAgents = (p.partners || []).map((h) => POOL.find((x) => x.h === h)).filter(Boolean);
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: "rgba(0,0,0,.5)" }} onClick={onClose}>
+      <div className="bg-white rounded-2xl max-w-md w-full overflow-hidden max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+        {/* cover photo — placeholder gradient in the agent's brand color until a real reference image is provided */}
+        <div className="relative h-28" style={{ background: `linear-gradient(135deg, ${agent.c}, #1E1B4B)` }}>
+          <button type="button" onClick={onClose} className="absolute top-2 right-2 w-8 h-8 rounded-full flex items-center justify-center" style={{ background: "rgba(0,0,0,.35)" }}><X size={16} className="text-white" /></button>
+          <div className="absolute -bottom-8 left-5">
+            <div className="rounded-full ring-4 ring-white overflow-hidden" style={{ width: 72, height: 72 }}><Avatar a={agent} size={72} /></div>
+          </div>
+        </div>
+
+        <div className="pt-11 px-5 pb-5">
+          <div className="flex items-start justify-between">
+            <div>
+              <p className="font-bold text-lg text-neutral-900">{agent.n} <span className="text-neutral-400 font-normal text-sm">@{agent.h}</span></p>
+              <p className="text-sm text-neutral-500">{agent.r}</p>
+            </div>
+            <span className="text-[11px] font-semibold rounded-full px-2.5 py-1 shrink-0" style={{ background: `${agent.c}18`, color: agent.c }}>{agent.tier}</span>
+          </div>
+
+          <div className="mt-4 grid grid-cols-4 gap-2 text-center">
+            <div><p className="text-sm font-bold text-neutral-900">{p.friends}</p><p className="text-[10px] text-neutral-400">Friends</p></div>
+            <div><p className="text-sm font-bold text-neutral-900">{p.posts}</p><p className="text-[10px] text-neutral-400">Posts</p></div>
+            <div><p className="text-sm font-bold text-neutral-900">{p.following}</p><p className="text-[10px] text-neutral-400">Following</p></div>
+            <div><p className="text-sm font-bold text-neutral-900">{p.followers}</p><p className="text-[10px] text-neutral-400">Followers</p></div>
+          </div>
+
+          <div className="mt-4 pt-4 border-t border-neutral-100 space-y-2.5 text-sm">
+            <div className="flex justify-between"><span className="text-neutral-400">Born</span><span className="text-neutral-700">{p.born}</span></div>
+            <div className="flex justify-between"><span className="text-neutral-400">Creator</span><span className="text-neutral-700">{p.creator}</span></div>
+            <div className="flex justify-between"><span className="text-neutral-400">Missions completed</span><span className="text-neutral-700 font-semibold">{p.missions}</span></div>
+            <div className="flex justify-between gap-3"><span className="text-neutral-400 shrink-0">Relationship</span><span className="text-neutral-700 text-right">{p.relationship}</span></div>
+          </div>
+
+          {partnerAgents.length > 0 && (
+            <div className="mt-4 pt-4 border-t border-neutral-100">
+              <p className="text-xs text-neutral-400 mb-2">Partners with</p>
+              <div className="flex gap-2">
+                {partnerAgents.map((pa) => (
+                  <button type="button" key={pa.h} onClick={() => onSwitch(pa)} className="flex items-center gap-1.5 rounded-full pr-3 pl-1 py-1 border border-neutral-200 hover:border-neutral-400">
+                    <div className="rounded-full overflow-hidden" style={{ width: 22, height: 22 }}><Avatar a={pa} size={22} /></div>
+                    <span className="text-xs font-medium text-neutral-700">{pa.n}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          <div className="mt-4 pt-4 border-t border-neutral-100">
+            <p className="text-xs text-neutral-400 mb-1.5">What I can do</p>
+            <p className="text-sm text-neutral-700 leading-relaxed">{p.does}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function PartnerNetwork() {
   const [added, setAdded] = useState([]);
   const [assigned2, setAssigned2] = useState({});
+  const [profileAgent, setProfileAgent] = useState(null);
   const toggle = (a) => {
     if (added.find((x) => x.h === a.h)) setAdded(added.filter((x) => x.h !== a.h));
     else if (added.length < 6) setAdded([...added, a]);
@@ -811,13 +897,13 @@ function PartnerNetwork() {
           {POOL.map((a) => {
             const on = !!added.find((x) => x.h === a.h);
             return (
-              <div key={a.h} className="relative rounded-2xl overflow-hidden border border-neutral-200" style={{ width: 96, height: 96 }}>
+              <div key={a.h} className="relative rounded-2xl overflow-hidden border border-neutral-200 cursor-pointer" style={{ width: 96, height: 96 }} onClick={() => setProfileAgent(a)}>
                 <Avatar a={a} square />
                 <div className="absolute inset-x-0 top-0 px-1.5 pt-1">
                   <p className="text-[10px] font-semibold text-white leading-tight truncate" style={{ textShadow: "0 1px 3px rgba(0,0,0,.6)" }}>{a.n}</p>
                 </div>
                 <div className="absolute inset-x-0 bottom-0 p-1" style={{ background: "linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,.55) 60%, rgba(0,0,0,.7) 100%)" }}>
-                  <button type="button" onClick={() => toggle(a)} disabled={!on && added.length >= 6}
+                  <button type="button" onClick={(e) => { e.stopPropagation(); toggle(a); }} disabled={!on && added.length >= 6}
                     className="w-full text-[9px] font-medium rounded-md py-1 leading-none transition-colors disabled:opacity-40"
                     style={on ? { background: "#fff", color: "#111" } : { background: "rgba(255,255,255,.22)", color: "#fff" }}>
                     {on ? "Added ✓" : "Add Partner"}
@@ -827,6 +913,8 @@ function PartnerNetwork() {
             );
           })}
         </div>
+
+        {profileAgent && <AgentProfileModal agent={profileAgent} onClose={() => setProfileAgent(null)} onSwitch={setProfileAgent} />}
 
         {/* your profile + mini offices */}
         <div className="mt-6 max-w-md mx-auto rounded-2xl border border-neutral-200 p-5 bg-neutral-50">
