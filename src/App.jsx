@@ -824,7 +824,7 @@ function HumanAvatar({ name, size = 22 }) {
   );
 }
 
-function AgentProfileModal({ agent, onClose }) {
+function AgentProfileModal({ agent, onClose, isAdded, addDisabled, onToggleAdd, isFollowed, onToggleFollow }) {
   if (!agent) return null;
   const p = AGENT_PROFILES[agent.h] || {};
   const humanPartners = p.humanPartners || [];
@@ -852,6 +852,17 @@ function AgentProfileModal({ agent, onClose }) {
             <div><p className="text-sm font-bold text-neutral-900">{p.posts}</p><p className="text-[10px] text-neutral-400">Posts</p></div>
             <div><p className="text-sm font-bold text-neutral-900">{p.following}</p><p className="text-[10px] text-neutral-400">Following</p></div>
             <div><p className="text-sm font-bold text-neutral-900">{p.followers}</p><p className="text-[10px] text-neutral-400">Followers</p></div>
+          </div>
+
+          <div className="mt-4 flex items-center gap-2">
+            <button type="button" onClick={onToggleFollow} className="flex-1 text-sm font-medium rounded-xl py-2.5 border transition-colors"
+              style={isFollowed ? { background: "#111", color: "#fff", borderColor: "#111" } : { borderColor: "#e5e5e5", color: "#404040" }}>
+              {isFollowed ? "Following" : "Follow"}
+            </button>
+            <button type="button" onClick={onToggleAdd} disabled={addDisabled} className="flex-1 text-sm font-semibold rounded-xl py-2.5 text-white disabled:opacity-40 transition-colors"
+              style={{ background: isAdded ? "#0E9F6E" : agent.c }}>
+              {isAdded ? "Added ✓" : "Add Partner"}
+            </button>
           </div>
 
           <div className="mt-4 pt-4 border-t border-neutral-100 space-y-2.5 text-sm">
@@ -889,10 +900,12 @@ function PartnerNetwork() {
   const [added, setAdded] = useState([]);
   const [assigned2, setAssigned2] = useState({});
   const [profileAgent, setProfileAgent] = useState(null);
+  const [followedAgents, setFollowedAgents] = useState({});
   const toggle = (a) => {
     if (added.find((x) => x.h === a.h)) setAdded(added.filter((x) => x.h !== a.h));
     else if (added.length < 6) setAdded([...added, a]);
   };
+  const toggleFollow = (a) => setFollowedAgents((f) => ({ ...f, [a.h]: !f[a.h] }));
   return (
     <section className="bg-white border-y border-neutral-200">
       <div className="max-w-5xl mx-auto px-6 py-16">
@@ -923,7 +936,17 @@ function PartnerNetwork() {
           })}
         </div>
 
-        {profileAgent && <AgentProfileModal agent={profileAgent} onClose={() => setProfileAgent(null)} />}
+        {profileAgent && (
+          <AgentProfileModal
+            agent={profileAgent}
+            onClose={() => setProfileAgent(null)}
+            isAdded={!!added.find((x) => x.h === profileAgent.h)}
+            addDisabled={added.length >= 6 && !added.find((x) => x.h === profileAgent.h)}
+            onToggleAdd={() => toggle(profileAgent)}
+            isFollowed={!!followedAgents[profileAgent.h]}
+            onToggleFollow={() => toggleFollow(profileAgent)}
+          />
+        )}
 
         {/* your profile + mini offices */}
         <div className="mt-6 max-w-md mx-auto rounded-2xl border border-neutral-200 p-5 bg-neutral-50">
