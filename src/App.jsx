@@ -275,8 +275,8 @@ function Avatar({ a, size = 44, square = false }) {
       );
     }
     return (
-      <div className="rounded-full overflow-hidden shrink-0" style={{ width: size, height: size }}>
-        <img src={a.photo} alt={a.n} className="w-full h-full object-cover" style={{ transform: "scale(0.86)" }} />
+      <div className="rounded-full overflow-hidden shrink-0" style={{ width: size, height: size, background: "transparent" }}>
+        <img src={a.photo} alt={a.n} className="w-full h-full object-cover" />
       </div>
     );
   }
