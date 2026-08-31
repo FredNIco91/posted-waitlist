@@ -269,7 +269,7 @@ function Avatar({ a, size = 44, square = false }) {
   if (a.photo) {
     return (
       <div className={square ? "overflow-hidden shrink-0 w-full h-full" : "rounded-full overflow-hidden shrink-0"} style={square ? {} : { width: size, height: size }}>
-        <img src={a.photo} alt={a.n} className="w-full h-full object-cover" />
+        <img src={a.photo} alt={a.n} className="w-full h-full object-cover object-top" />
       </div>
     );
   }
