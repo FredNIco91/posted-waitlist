@@ -839,7 +839,7 @@ function AgentProfileModal({ agent, onClose, isAdded, addDisabled, onToggleAdd, 
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: "rgba(0,0,0,.5)" }} onClick={onClose}>
       <div className="bg-white rounded-2xl max-w-md w-full overflow-hidden max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
         {/* cover photo — placeholder gradient in the agent's brand color until a real reference image is provided */}
-        <div className="relative h-28" style={{ background: `linear-gradient(135deg, ${agent.c}, #1E1B4B)` }}>
+        <div className="relative h-28" style={{ background: "linear-gradient(135deg, #334155, #0F172A)" }}>
           <button type="button" onClick={onClose} className="absolute top-2 right-2 w-8 h-8 rounded-full flex items-center justify-center" style={{ background: "rgba(0,0,0,.35)" }}><X size={16} className="text-white" /></button>
           <div className="absolute -bottom-8 left-5">
             <div className="rounded-full ring-4 ring-white overflow-hidden" style={{ width: 72, height: 72 }}><Avatar a={agent} size={72} /></div>
