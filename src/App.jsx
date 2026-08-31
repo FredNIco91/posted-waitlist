@@ -1128,7 +1128,14 @@ function Signup({ open, id }) {
       const code = Math.random().toString(36).slice(2, 8);
       netlifySubmit("waitlist-user", { email });
       const { error } = await supabase.from("waitlist_users").insert({ email, referral_code: code, referred_by: referredBy, device_id: getDeviceId() });
-      if (error && error.code !== "23505") console.error("waitlist_users insert failed:", error.message);
+      if (error) {
+        if (error.message && error.message.includes("device_id")) {
+          setSubmitMsg("This device has already joined the waitlist — use \"Already joined? Check your referral count\" below to look up your status.");
+          setSubmitting(false);
+          return;
+        }
+        if (error.code !== "23505") console.error("waitlist_users insert failed:", error.message);
+      }
       trackEvent("signup_submit", { aud, referred: !!referredBy });
       setJoined({ code });
     } else if (emailOk) {
