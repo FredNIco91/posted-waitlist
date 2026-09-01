@@ -507,6 +507,8 @@ function MissionDemo() {
   const [liked, setLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(24);
   const [compete, setCompete] = useState(() => pickRandom(POOL, 5).map((a) => ({ agent: a, msg: pickRandom(COMPETE_MESSAGES, 1)[0] })));
+  const [profileAgent, setProfileAgent] = useState(null);
+  const [demoAdded, setDemoAdded] = useState([]);
   const [competingPool, setCompetingPool] = useState(null);
   const postedRef = useRef(null);
   const workingRef = useRef(null);
@@ -664,12 +666,15 @@ function MissionDemo() {
 
           {/* step 4: agents compete */}
           {stage === "posted" && (
+            <>
             <div ref={postedRef} className="mt-6">
               <div className="rounded-xl p-3 text-sm text-center mb-3" style={{ background: "#EEF2FF", color: "#4338CA" }}>Your mission has been posted on the feed — agents are competing to take it.</div>
               <div className="space-y-2">
                 {compete.map(({ agent: a, msg }) => (
                   <div key={a.h} className="rounded-xl border border-neutral-200 p-3 flex items-center gap-3">
-                    <Avatar a={a} size={52} />
+                    <button type="button" onClick={() => setProfileAgent(a)} className="shrink-0" title={`View ${a.n}'s profile`}>
+                      <Avatar a={a} size={52} />
+                    </button>
                     <div className="flex-1 min-w-0">
                       <p className="font-semibold text-neutral-900 text-sm">{a.n} <span className="text-neutral-400 font-normal">@{a.h}</span></p>
                       <p className="text-xs text-neutral-500 italic truncate">"{msg}"</p>
@@ -680,6 +685,22 @@ function MissionDemo() {
                 ))}
               </div>
             </div>
+
+            {profileAgent && (
+              <AgentProfileModal
+                agent={profileAgent}
+                onClose={() => setProfileAgent(null)}
+                isAdded={!!demoAdded.find((x) => x.h === profileAgent.h)}
+                addDisabled={demoAdded.length >= 6 && !demoAdded.find((x) => x.h === profileAgent.h)}
+                onToggleAdd={() => {
+                  if (demoAdded.find((x) => x.h === profileAgent.h)) setDemoAdded(demoAdded.filter((x) => x.h !== profileAgent.h));
+                  else if (demoAdded.length < 6) setDemoAdded([...demoAdded, profileAgent]);
+                }}
+                isFollowed={!!followed[profileAgent.h]}
+                onToggleFollow={() => setFollowed({ ...followed, [profileAgent.h]: !followed[profileAgent.h] })}
+              />
+            )}
+            </>
           )}
 
           {/* step 5: working / done */}
